@@ -2,7 +2,7 @@
 
 A dark, cinematic weather dashboard built with React and Vite. Real-time weather conditions, 7-day forecasts, hourly trends, and air quality data — all from free APIs with no API key required.
 
-Live demo → **Coming soon**
+Live demo → **(https://me-atmos.vercel.app/)**
 
 ---
 
