@@ -1,9 +1,22 @@
+import { m } from 'motion/react'
 import WeatherIcon from './WeatherIcon'
 import Icon from './Icon'
 import { getWMO } from '../utils/weatherCodes'
 import { formatTemp, formatDay } from '../utils/formatters'
 import { tempColor } from '../utils/temperature'
 import { todayIndex } from '../utils/forecast'
+import { EASE, rise } from '../utils/motion'
+
+// Bars grow from each day's minimum, one row after another
+const grow = {
+  hidden: { scaleX: 0 },
+  visible: i => ({ scaleX: 1, transition: { duration: 0.8, ease: EASE, delay: 0.15 + i * 0.06 } }),
+}
+// The "now" dot keeps its centering translate while it pops in
+const pop = {
+  hidden: { scale: 0, x: '-50%', y: '-50%' },
+  visible: { scale: 1, x: '-50%', y: '-50%', transition: { type: 'spring', stiffness: 400, damping: 18, delay: 0.8 } },
+}
 import './WeekForecast.css'
 
 export default function WeekForecast({ weather }) {
@@ -26,10 +39,17 @@ export default function WeekForecast({ weather }) {
   const now = weather.current.temperature_2m
 
   return (
-    <section className="card week" aria-labelledby="week-title">
+    <m.section
+      className="card week"
+      aria-labelledby="week-title"
+      variants={rise}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.25 }}
+    >
       <h2 id="week-title" className="eyebrow">Próximos 7 días</h2>
       <ol className="week__list">
-        {days.map(day => {
+        {days.map((day, row) => {
           const wmo = getWMO(day.code)
           return (
             <li key={day.time} className={`week__row ${day.isToday ? 'is-today' : ''}`}>
@@ -59,8 +79,8 @@ export default function WeekForecast({ weather }) {
                   '--now': pct(now),
                 }}
               >
-                <span className="range__fill" />
-                {day.isToday && <span className="range__now" title="Ahora" />}
+                <m.span className="range__fill" variants={grow} custom={row} />
+                {day.isToday && <m.span className="range__now" variants={pop} />}
               </span>
               <span className="week__max num">
                 <span className="visually-hidden">máxima </span>{formatTemp(day.max)}
@@ -69,6 +89,6 @@ export default function WeekForecast({ weather }) {
           )
         })}
       </ol>
-    </section>
+    </m.section>
   )
 }

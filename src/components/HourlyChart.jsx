@@ -1,4 +1,5 @@
 import { useId, useRef, useState } from 'react'
+import { m } from 'motion/react'
 import WeatherIcon from './WeatherIcon'
 import { getWMO } from '../utils/weatherCodes'
 import { formatTemp, formatClock } from '../utils/formatters'
@@ -6,6 +7,7 @@ import { nextHours } from '../utils/forecast'
 import { tempColor } from '../utils/temperature'
 import { smoothPath, runs } from '../utils/chart'
 import { useElementWidth } from '../hooks/useElementWidth'
+import { EASE, rise } from '../utils/motion'
 import './HourlyChart.css'
 
 const H = 200
@@ -16,6 +18,7 @@ const CURVE_BOTTOM = 124
 const BAR_TOP = 138
 const BAR_BOTTOM = 166
 const LABEL_Y = 188
+const FOLLOW = { type: 'spring', stiffness: 500, damping: 40 }
 
 const describe = (h, i) =>
   `${i === 0 ? 'Ahora' : formatClock(h.time)}, ${formatTemp(h.temp)}, ${getWMO(h.code).label.toLowerCase()}, ${h.precip}% de probabilidad de lluvia`
@@ -61,7 +64,14 @@ export default function HourlyChart({ weather }) {
   }
 
   return (
-    <section className="card hourly" aria-labelledby="hourly-title">
+    <m.section
+      className="card hourly"
+      aria-labelledby="hourly-title"
+      variants={rise}
+      initial="hidden"
+      animate="visible"
+      transition={{ delay: 0.15 }}
+    >
       <div className="hourly__head">
         <h2 id="hourly-title" className="eyebrow">Próximas 24 horas</h2>
         <p className="hourly__readout" aria-hidden="true">
@@ -109,22 +119,49 @@ export default function HourlyChart({ weather }) {
               />
             ))}
 
-            {hours.map((h, i) => (
-              <rect
-                key={h.time}
-                className="hourly__bar"
-                x={x(i) - slot * 0.28}
-                y={BAR_BOTTOM - (h.precip / 100) * (BAR_BOTTOM - BAR_TOP)}
-                width={slot * 0.56}
-                height={Math.max(1.5, (h.precip / 100) * (BAR_BOTTOM - BAR_TOP))}
-                rx={2}
-              />
-            ))}
+            {/* Rain bars grow from the baseline, one hour after another */}
+            {hours.map((h, i) => {
+              const barH = Math.max(1.5, (h.precip / 100) * (BAR_BOTTOM - BAR_TOP))
+              return (
+                <m.rect
+                  key={h.time}
+                  className="hourly__bar"
+                  x={x(i) - slot * 0.28}
+                  width={slot * 0.56}
+                  rx={2}
+                  initial={{ y: BAR_BOTTOM, height: 0 }}
+                  animate={{ y: BAR_BOTTOM - barH, height: barH }}
+                  transition={{ duration: 0.5, ease: EASE, delay: 0.5 + i * 0.025 }}
+                />
+              )
+            })}
 
-            <path className="hourly__area" d={area} fill={`url(#${gradId})`} />
-            <path className="hourly__line" d={line} stroke={`url(#${gradId})`} />
+            {/* The line draws itself left to right, then the area fades in under it */}
+            <m.path
+              className="hourly__area"
+              d={area}
+              fill={`url(#${gradId})`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.14 }}
+              transition={{ duration: 0.8, delay: 1 }}
+            />
+            <m.path
+              className="hourly__line"
+              d={line}
+              stroke={`url(#${gradId})`}
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 1.3, ease: EASE, delay: 0.2 }}
+            />
 
-            <line className="hourly__guide" x1={x(active)} x2={x(active)} y1={ICON_Y + 30} y2={BAR_BOTTOM} />
+            <m.line
+              className="hourly__guide"
+              y1={ICON_Y + 30}
+              y2={BAR_BOTTOM}
+              initial={false}
+              animate={{ x1: x(active), x2: x(active) }}
+              transition={FOLLOW}
+            />
 
             {hours.map((h, i) => (i % every === 0 || i === active) && (
               <g key={h.time} className={`hourly__tick ${i === active ? 'is-active' : ''}`}>
@@ -142,7 +179,13 @@ export default function HourlyChart({ weather }) {
               </g>
             ))}
 
-            <circle className="hourly__dot" cx={x(active)} cy={y(current.temp)} r={5.5} stroke={tempColor(current.temp)} />
+            <m.circle
+              className="hourly__dot"
+              r={5.5}
+              initial={false}
+              animate={{ cx: x(active), cy: y(current.temp), stroke: tempColor(current.temp) }}
+              transition={FOLLOW}
+            />
           </svg>
         )}
       </div>
@@ -151,6 +194,6 @@ export default function HourlyChart({ weather }) {
         <span className="hourly__legend-bar" aria-hidden="true" /> Probabilidad de lluvia
         <span className="hourly__legend-night" aria-hidden="true" /> Noche
       </p>
-    </section>
+    </m.section>
   )
 }

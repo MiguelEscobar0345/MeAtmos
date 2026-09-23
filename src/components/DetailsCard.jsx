@@ -1,7 +1,9 @@
+import { m } from 'motion/react'
 import Icon from './Icon'
 import { getUVLevel } from '../utils/weatherCodes'
 import { formatTemp } from '../utils/formatters'
 import { todayIndex } from '../utils/forecast'
+import { rise } from '../utils/motion'
 import './Conditions.css'
 
 export default function DetailsCard({ weather }) {
@@ -50,7 +52,14 @@ export default function DetailsCard({ weather }) {
   ]
 
   return (
-    <section className="card cond details" aria-labelledby="details-title">
+    <m.section
+      className="card cond details"
+      aria-labelledby="details-title"
+      variants={rise}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.3 }}
+    >
       <h2 id="details-title" className="visually-hidden">Más datos</h2>
       <dl className="details__grid">
         {items.map(item => (
@@ -64,6 +73,6 @@ export default function DetailsCard({ weather }) {
           </div>
         ))}
       </dl>
-    </section>
+    </m.section>
   )
 }

@@ -52,6 +52,7 @@
 
 .range__fill {
   position: absolute;
+  transform-origin: left center;
   inset-block: 0;
   left: var(--from);
   right: calc(100% - var(--to));

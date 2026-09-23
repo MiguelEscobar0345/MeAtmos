@@ -15,8 +15,6 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  display: grid;
-  gap: 18px;
   padding: clamp(20px, 3.5vw, 36px);
   border-radius: var(--r-xl);
   color: #fff;
@@ -31,6 +29,21 @@
   inset: 0;
   z-index: -1;
   background: linear-gradient(100deg, rgba(4, 8, 20, 0.34) 0%, rgba(4, 8, 20, 0.1) 55%, transparent 80%);
+}
+
+/* Layers: gradient (background) → moving sky (canvas) → scrim → content */
+.hero__sky {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.hero__inner {
+  display: grid;
+  gap: 18px;
 }
 
 .hero[data-sky='clear-day']     { --sky-1: #1c4f99; --sky-2: #3a78c2; --sky-3: #86b4e3; }
@@ -127,11 +140,44 @@
   letter-spacing: -0.06em;
 }
 
+.hero__icon-wrap { margin-right: clamp(0px, 3vw, 40px); }
+
 .hero__icon {
   width: clamp(88px, 20vw, 190px);
-  margin-right: clamp(0px, 3vw, 40px);
   height: auto;
   filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.18));
+}
+
+/* ── Odometer ── */
+.roll { display: inline-flex; }
+
+/* Each digit rolls inside its own window; the padding keeps glyph tops unclipped */
+.roll__slot {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  padding-block: 0.1em;
+  margin-block: -0.1em;
+}
+
+.roll__digit { display: inline-block; }
+
+/* ── Save: star pop and sparks ── */
+.save__star {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+}
+
+.save__icon { display: inline-grid; }
+
+.save__spark {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--star);
+  pointer-events: none;
 }
 
 .hero__cond {
@@ -150,6 +196,6 @@
 .hero__clock { white-space: nowrap; }
 
 @media (max-width: 480px) {
-  .save span { display: none; }
+  .save__label { display: none; }
   .save { width: 40px; padding: 0; justify-content: center; }
 }

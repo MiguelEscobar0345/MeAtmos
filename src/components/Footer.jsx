@@ -1,4 +1,6 @@
+import { m } from 'motion/react'
 import Icon from './Icon'
+import { EASE } from '../utils/motion'
 import './Footer.css'
 
 const CONTACT = [
@@ -21,10 +23,34 @@ export default function Footer() {
         <div className="footer__top">
           <div className="footer__brand">
             <p className="eyebrow">Diseñado y construido por Miguel Escobar</p>
-            <a href="https://miguesco.dev" target="_blank" rel="noreferrer" className="footer__name">
-              miguesco
-              <Icon name="arrowUpRight" size={40} className="footer__arrow" />
-            </a>
+            {/* Observe the visible link, not the masked text: the text starts
+                fully clipped, so it would never count as in view */}
+            <m.a
+              href="https://miguesco.dev"
+              target="_blank"
+              rel="noreferrer"
+              className="footer__name"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: '-40px' }}
+            >
+              <span className="footer__mask">
+                <m.span
+                  className="footer__line"
+                  variants={{ hidden: { y: '110%' }, visible: { y: 0 } }}
+                  transition={{ duration: 0.9, ease: EASE }}
+                >
+                  miguesco
+                </m.span>
+              </span>
+              <m.span
+                className="footer__arrow-wrap"
+                variants={{ hidden: { opacity: 0, x: -8, y: 8 }, visible: { opacity: 1, x: 0, y: 0 } }}
+                transition={{ duration: 0.6, ease: EASE, delay: 0.5 }}
+              >
+                <Icon name="arrowUpRight" size={40} className="footer__arrow" />
+              </m.span>
+            </m.a>
           </div>
 
           <nav className="footer__cols" aria-label="Contacto y redes">

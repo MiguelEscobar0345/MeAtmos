@@ -1,3 +1,4 @@
+import { m } from 'motion/react'
 import NowHero from './NowHero'
 import HourlyChart from './HourlyChart'
 import WeekForecast from './WeekForecast'
@@ -5,6 +6,7 @@ import AirQuality from './AirQuality'
 import SunCard from './SunCard'
 import WindCard from './WindCard'
 import DetailsCard from './DetailsCard'
+import { EASE } from '../utils/motion'
 import './CityView.css'
 
 export default function CityView({ weather, aq, location, isFavorite, canSave, onToggleFavorite }) {
@@ -33,9 +35,17 @@ export default function CityView({ weather, aq, location, isFavorite, canSave, o
 export function CitySkeleton({ location }) {
   return (
     <div className="city" aria-busy="true" aria-label="Cargando el clima">
-      <div className="skeleton city__sk-hero">
+      {/* Same layoutId as the favorite card and the hero, so the card keeps
+          growing while the forecast loads */}
+      <m.div
+        layoutId={location ? `city-${location.id}` : undefined}
+        className="skeleton city__sk-hero"
+        initial={{ borderRadius: 32 }}
+        animate={{ borderRadius: 32 }}
+        transition={{ layout: { duration: 0.6, ease: EASE } }}
+      >
         {location && <p className="city__sk-name">{location.name}</p>}
-      </div>
+      </m.div>
       <div className="skeleton city__sk-block" />
       <div className="city__grid">
         <div className="city__week skeleton city__sk-tall" />

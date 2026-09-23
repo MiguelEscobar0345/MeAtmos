@@ -31,3 +31,48 @@
 .wi-hail  { fill: var(--wi-snow); }
 .wi-bolt  { fill: var(--sun); stroke: var(--sun); stroke-width: 0.6; stroke-linejoin: round; }
 .wi-fog   { stroke: var(--wi-cloud-line); stroke-width: 2; stroke-linecap: round; }
+
+/* ── Idle motion, only for the big hero icon (.wi--live) ──
+   Transform-animating a <g> that has a transform attribute would override
+   it, so the moving parts are the attribute-free inner shapes. */
+.wi--live .wi-rays,
+.wi--live .wi-cloud,
+.wi--live .wi-drop,
+.wi--live .wi-flake,
+.wi--live .wi-fog,
+.wi--live .wi-moon,
+.wi--live .wi-bolt {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.wi--live .wi-rays  { animation: wi-spin 40s linear infinite; }
+.wi--live .wi-cloud { animation: wi-drift 7s ease-in-out infinite alternate; }
+.wi--live .wi-drop  { animation: wi-fall 1.2s linear infinite; }
+.wi--live .wi-drop:nth-child(2) { animation-delay: -0.4s; }
+.wi--live .wi-drop:nth-child(3) { animation-delay: -0.8s; }
+.wi--live .wi-flake { animation: wi-snow 3s ease-in-out infinite; }
+.wi--live .wi-flake:nth-of-type(2) { animation-delay: -1s; }
+.wi--live .wi-flake:nth-of-type(3) { animation-delay: -2s; }
+.wi--live .wi-fog   { animation: wi-drift 4s ease-in-out infinite alternate; }
+.wi--live .wi-fog:nth-child(2) { animation-direction: alternate-reverse; }
+.wi--live .wi-moon  { animation: wi-glow 5s ease-in-out infinite alternate; }
+.wi--live .wi-bolt  { animation: wi-flash 5s steps(1) infinite; }
+
+@keyframes wi-spin  { to { transform: rotate(360deg); } }
+@keyframes wi-drift { from { transform: translateX(-3%); } to { transform: translateX(3%); } }
+@keyframes wi-fall {
+  0%   { transform: translate(0, -2px); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translate(-1px, 4px); opacity: 0; }
+}
+@keyframes wi-snow {
+  0%   { transform: translate(0, -2px) rotate(0deg); opacity: 0; }
+  30%  { opacity: 1; }
+  100% { transform: translate(1px, 3px) rotate(90deg); opacity: 0; }
+}
+@keyframes wi-glow { from { opacity: 0.85; } to { opacity: 1; } }
+@keyframes wi-flash {
+  0%, 88%, 94%, 100% { opacity: 1; }
+  90%, 96% { opacity: 0.35; }
+}

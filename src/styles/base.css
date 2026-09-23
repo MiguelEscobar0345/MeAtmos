@@ -110,6 +110,13 @@ a { color: inherit; }
   to   { background-position: -100% 0; }
 }
 
+/* Theme change: the new snapshot is revealed by a circle (see useTheme) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
