@@ -1,3 +1,5 @@
+import { onLinkClick } from '../router'
+
 // The mark: a low sun on the horizon under the sky's dome
 export function LogoMark({ size = 30 }) {
   return (
@@ -9,18 +11,9 @@ export function LogoMark({ size = 30 }) {
   )
 }
 
-export default function Logo({ onHome }) {
+export default function Logo() {
   return (
-    <a
-      href="/"
-      className="logo"
-      aria-label="MeAtmos by miguesco, inicio"
-      onClick={e => {
-        if (!onHome || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return
-        e.preventDefault()
-        onHome()
-      }}
-    >
+    <a href="/" className="logo" aria-label="MeAtmos by miguesco, inicio" onClick={e => onLinkClick(e, '/')}>
       <LogoMark />
       <span className="logo__word">Me<span>Atmos</span></span>
       <span className="logo__by">by miguesco</span>

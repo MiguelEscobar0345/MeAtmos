@@ -4,7 +4,7 @@ import SearchBar from './SearchBar'
 import Icon from './Icon'
 import './Header.css'
 
-export default function Header({ onHome, onSearch, loading, theme, onToggleTheme }) {
+export default function Header({ onSelectCity, theme, onToggleTheme }) {
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -19,8 +19,8 @@ export default function Header({ onHome, onSearch, loading, theme, onToggleTheme
   return (
     <header className={`header ${scrolled ? 'is-scrolled' : ''}`}>
       <div className="page header__row">
-        <Logo onHome={onHome} />
-        <SearchBar onSearch={onSearch} loading={loading} />
+        <Logo />
+        <SearchBar onSelect={onSelectCity} />
         <button
           type="button"
           className="theme-toggle"

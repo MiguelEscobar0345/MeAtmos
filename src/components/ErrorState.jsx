@@ -1,30 +1,44 @@
 import Icon from './Icon'
+import { onLinkClick } from '../router'
 import './ErrorState.css'
 
-export default function ErrorState({ error, onRetry, onHome }) {
-  const notFound = error.type === 'not-found'
+const COPY = {
+  'unknown-city': {
+    icon: 'search',
+    title: 'No encontramos esa ciudad',
+    text: 'El enlace puede estar incompleto o mal copiado. Búscala de nuevo arriba.',
+  },
+  page: {
+    icon: 'search',
+    title: 'Esta página no existe',
+    text: 'Busca una ciudad arriba o vuelve al inicio.',
+  },
+  network: {
+    icon: 'alert',
+    title: 'No pudimos traer el clima',
+    text: 'Puede ser tu conexión o el servicio de Open-Meteo. Inténtalo de nuevo en un momento.',
+    retry: true,
+  },
+}
+
+export default function ErrorState({ type, onRetry }) {
+  const copy = COPY[type] ?? COPY.network
   return (
     <section className="error" role="alert">
       <span className="error__icon" aria-hidden="true">
-        <Icon name={notFound ? 'search' : 'alert'} size={26} />
+        <Icon name={copy.icon} size={26} />
       </span>
-      <h1 className="error__title">
-        {notFound ? <>No encontramos «{error.query}»</> : 'No pudimos traer el clima'}
-      </h1>
-      <p className="error__text">
-        {notFound
-          ? <>Revisa cómo se escribe o agrega el país, por ejemplo <b>San José, Costa Rica</b>.</>
-          : 'Puede ser tu conexión o el servicio de Open-Meteo. Inténtalo de nuevo en un momento.'}
-      </p>
+      <h1 className="error__title">{copy.title}</h1>
+      <p className="error__text">{copy.text}</p>
       <div className="error__actions">
-        {!notFound && (
+        {copy.retry && (
           <button type="button" className="btn btn--primary" onClick={onRetry}>
             <Icon name="refresh" size={17} /> Reintentar
           </button>
         )}
-        <button type="button" className="btn" onClick={onHome}>
+        <a href="/" className="btn" onClick={e => onLinkClick(e, '/')}>
           <Icon name="home" size={17} /> Volver al inicio
-        </button>
+        </a>
       </div>
     </section>
   )

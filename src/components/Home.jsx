@@ -1,9 +1,11 @@
 import FavoriteCities from './FavoriteCities'
 import { LogoMark } from './Logo'
 import { SUGGESTED } from '../utils/cities'
+import { cityPath, onLinkClick } from '../router'
+import { rememberLocation } from '../hooks/useCity'
 import './Home.css'
 
-export default function Home({ favorites, liveFor, max, onOpen, onRemove }) {
+export default function Home({ favorites, liveFor, max, onOpenLegacy, onRemove }) {
   return (
     <div className="home">
       <section className="home__hero" aria-labelledby="home-title">
@@ -19,9 +21,13 @@ export default function Home({ favorites, liveFor, max, onOpen, onRemove }) {
             <ul className="chips">
               {SUGGESTED.map(city => (
                 <li key={city.id}>
-                  <button type="button" className="chip" onClick={() => onOpen(city)}>
+                  <a
+                    href={cityPath(city)}
+                    className="chip"
+                    onClick={e => onLinkClick(e, cityPath(city), () => rememberLocation(city))}
+                  >
                     {city.name}
-                  </button>
+                  </a>
                 </li>
               ))}
             </ul>
@@ -36,7 +42,7 @@ export default function Home({ favorites, liveFor, max, onOpen, onRemove }) {
         favorites={favorites}
         liveFor={liveFor}
         max={max}
-        onOpen={onOpen}
+        onOpenLegacy={onOpenLegacy}
         onRemove={onRemove}
       />
     </div>

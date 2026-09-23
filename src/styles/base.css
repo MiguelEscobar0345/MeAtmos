@@ -82,6 +82,8 @@ a { color: inherit; }
   border: 1px solid var(--line-strong);
   font-weight: 700;
   font-size: 0.9rem;
+  color: inherit;
+  text-decoration: none;
   transition: background-color var(--dur) ease, border-color var(--dur) ease, color var(--dur) ease;
 }
 
@@ -121,6 +123,9 @@ a { color: inherit; }
   flex: 1;
   padding-top: clamp(20px, 4vw, 36px);
 }
+
+/* Focus moves here after navigating; the new content is the cue */
+.main:focus { outline: none; }
 
 .skip-link {
   position: absolute;

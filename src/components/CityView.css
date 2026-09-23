@@ -25,7 +25,16 @@
 }
 
 /* ── Skeleton ── */
-.city__sk-hero  { height: 360px; border-radius: var(--r-xl); }
+.city__sk-hero  { height: 360px; border-radius: var(--r-xl); padding: clamp(20px, 3.5vw, 36px); }
+
+.city__sk-name {
+  margin-top: 26px;
+  font-size: clamp(2.1rem, 6vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  color: var(--ink-3);
+}
 .city__sk-block { height: 280px; border-radius: var(--r-lg); }
 .city__sk-tall  { height: 440px; border-radius: var(--r-lg); }
 .city__sk-card  { height: 260px; border-radius: var(--r-lg); }

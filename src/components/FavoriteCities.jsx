@@ -3,8 +3,24 @@ import Icon from './Icon'
 import { getWMO } from '../utils/weatherCodes'
 import { formatClock, countryName } from '../utils/formatters'
 import { favKey } from '../hooks/useFavoritesWeather'
+import { rememberLocation } from '../hooks/useCity'
+import { cityPath, onLinkClick } from '../router'
 
-export default function FavoriteCities({ favorites, liveFor, max, onOpen, onRemove }) {
+// Saved cities are links (open in a new tab, copy the URL…). Entries saved
+// before v2 have no id, so they resolve through a button first.
+function Open({ city, onOpenLegacy, children }) {
+  if (city.id == null) {
+    return <button type="button" className="fav__open" onClick={() => onOpenLegacy(city)}>{children}</button>
+  }
+  const to = cityPath(city)
+  return (
+    <a href={to} className="fav__open" onClick={e => onLinkClick(e, to, () => rememberLocation(city))}>
+      {children}
+    </a>
+  )
+}
+
+export default function FavoriteCities({ favorites, liveFor, max, onOpenLegacy, onRemove }) {
   return (
     <section className="favs" aria-labelledby="favs-title">
       <div className="favs__head">
@@ -31,7 +47,7 @@ export default function FavoriteCities({ favorites, liveFor, max, onOpen, onRemo
             const waiting = city.lat != null && !live
             return (
               <li key={favKey(city)} className="fav">
-                <button type="button" className="fav__open" onClick={() => onOpen(city)}>
+                <Open city={city} onOpenLegacy={onOpenLegacy}>
                   <span className="fav__top">
                     {waiting
                       ? <span className="skeleton fav__icon-sk" />
@@ -46,7 +62,7 @@ export default function FavoriteCities({ favorites, liveFor, max, onOpen, onRemo
                       : <span className="fav__temp">{temp != null ? `${Math.round(temp)}°` : '—'}</span>}
                     {!waiting && <span className="fav__cond">{wmo.label}</span>}
                   </span>
-                </button>
+                </Open>
                 <button
                   type="button"
                   className="fav__remove"

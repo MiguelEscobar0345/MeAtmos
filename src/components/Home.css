@@ -47,6 +47,9 @@
 }
 
 .chip {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
   height: 38px;
   padding: 0 15px;
   border-radius: var(--r-pill);
@@ -102,6 +105,8 @@
 .fav { position: relative; }
 
 .fav__open {
+  color: inherit;
+  text-decoration: none;
   width: 100%;
   height: 100%;
   display: flex;

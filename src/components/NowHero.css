@@ -82,6 +82,12 @@
   opacity: 0.92;
 }
 
+.hero__actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
 .save {
   flex-shrink: 0;
   display: inline-flex;
