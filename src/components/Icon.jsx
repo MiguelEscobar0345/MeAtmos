@@ -16,6 +16,7 @@ const PATHS = {
   home:     <><path d="M4 11 12 4l8 7" /><path d="M6 9.5V20h12V9.5" /></>,
   share:    <><path d="M12 15V3.5" /><path d="m7.5 8 4.5-4.5L16.5 8" /><path d="M5 12.5V19a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19v-6.5" /></>,
   check:    <path d="m5 12.5 4.5 4.5L19 7.5" />,
+  locate:   <><circle cx="12" cy="12" r="6.5" /><circle cx="12" cy="12" r="2" /><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3" /></>,
 }
 
 export default function Icon({ name, size = 20, filled = false, className = '' }) {

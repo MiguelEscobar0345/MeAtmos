@@ -2,7 +2,8 @@ import { m } from 'motion/react'
 import WeatherIcon from './WeatherIcon'
 import Icon from './Icon'
 import { getWMO } from '../utils/weatherCodes'
-import { formatTemp, formatDay } from '../utils/formatters'
+import { formatDay } from '../utils/formatters'
+import { useUnits } from '../hooks/useUnits'
 import { tempColor } from '../utils/temperature'
 import { todayIndex } from '../utils/forecast'
 import { EASE, rise } from '../utils/motion'
@@ -22,6 +23,7 @@ import './WeekForecast.css'
 export default function WeekForecast({ weather }) {
   const d = weather.daily
   const today = todayIndex(weather)
+  const { fmtTemp } = useUnits()
   const days = d.time.map((time, i) => ({
     time,
     code: d.weather_code[i],
@@ -66,7 +68,7 @@ export default function WeekForecast({ weather }) {
                 )}
               </span>
               <span className="week__min num">
-                <span className="visually-hidden">mínima </span>{formatTemp(day.min)}
+                <span className="visually-hidden">mínima </span>{fmtTemp(day.min)}
               </span>
               <span
                 className="range"
@@ -83,7 +85,7 @@ export default function WeekForecast({ weather }) {
                 {day.isToday && <m.span className="range__now" variants={pop} />}
               </span>
               <span className="week__max num">
-                <span className="visually-hidden">máxima </span>{formatTemp(day.max)}
+                <span className="visually-hidden">máxima </span>{fmtTemp(day.max)}
               </span>
             </li>
           )

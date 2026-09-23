@@ -193,6 +193,16 @@
 }
 
 .hero__range .num { font-weight: 500; }
+
+.hero__summary {
+  max-width: 36rem;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
 .hero__clock { white-space: nowrap; }
 
 @media (max-width: 480px) {

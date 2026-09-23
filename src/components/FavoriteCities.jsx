@@ -7,6 +7,13 @@ import { favKey } from '../hooks/useFavoritesWeather'
 import { rememberLocation } from '../hooks/useCity'
 import { cityPath, onLinkClick } from '../router'
 import { EASE } from '../utils/motion'
+import { useUnits } from '../hooks/useUnits'
+import { useCityNow } from '../hooks/useClock'
+
+// Each card runs its city's clock
+function LocalTime({ offset }) {
+  return <span className="fav__time num">{formatClock(useCityNow(offset))}</span>
+}
 
 // Saved cities are links (open in a new tab, copy the URL…). Entries saved
 // before v2 have no id, so they resolve through a button first.
@@ -32,6 +39,7 @@ function Open({ city, onOpenLegacy, children }) {
 }
 
 export default function FavoriteCities({ favorites, liveFor, max, onOpenLegacy, onRemove }) {
+  const units = useUnits()
   return (
     <section className="favs" aria-labelledby="favs-title">
       <div className="favs__head">
@@ -71,14 +79,14 @@ export default function FavoriteCities({ favorites, liveFor, max, onOpenLegacy, 
                       {waiting
                         ? <span className="skeleton fav__icon-sk" />
                         : <WeatherIcon icon={wmo.icon} isDay={live?.is_day ?? 1} size={40} />}
-                      {live && <span className="fav__time num">{formatClock(live.time)}</span>}
+                      {live && <LocalTime offset={live.offset} />}
                     </span>
                     <span className="fav__name">{city.name}</span>
                     <span className="fav__country">{countryName(city.country_code, city.country)}</span>
                     <span className="fav__bottom">
                       {waiting
                         ? <span className="skeleton fav__temp-sk" />
-                        : <span className="fav__temp">{temp != null ? `${Math.round(temp)}°` : '—'}</span>}
+                        : <span className="fav__temp">{temp != null ? units.fmtTemp(temp) : '—'}</span>}
                       {!waiting && <span className="fav__cond">{wmo.label}</span>}
                     </span>
                   </Open>

@@ -1,178 +1,106 @@
-# ME Atmos — Weather & Air Quality Dashboard
+# MeAtmos by miguesco
 
-A dark, cinematic weather dashboard built with React and Vite. Real-time weather conditions, 7-day forecasts, hourly trends, and air quality data — all from free APIs with no API key required.
+The weather of any city, on that city's own clock. Built with React, Vite and [Motion](https://motion.dev). The interface is in Spanish.
 
-Live demo → **(https://me-atmos.vercel.app/)**
-
----
-
-## Preview
-
-> Deep navy atmosphere that shifts with the weather. Monospaced data typography meets editorial layout — built to impress and to actually work.
+Live → **[me-atmos.vercel.app](https://me-atmos.vercel.app/)**
 
 ---
 
-## Tech Stack
+## What it does
+
+- **Search any city.** Autocomplete shows region and country, understands Spanish and English names ("New York" → Nueva York), and works with the keyboard. You can also use your location.
+- **Every city has a URL.** `/c/<GeoNames id>/<slug>`, e.g. [`/c/1850147/tokio`](https://me-atmos.vercel.app/c/1850147/tokio). You can share it, bookmark it, and back/forward work.
+- **The sky right now.** The main card is a window to the city's sky:
+  - the gradient follows the weather and the real local dawn, day, dusk or night;
+  - a canvas layer draws rain slanted by the actual wind, snow, drifting fog and clouds sized by cloud cover, stars at night and soft lightning in storms.
+- **A sentence, not just numbers.** For example: "Probable lluvia desde las 16:00 (70%). Máxima de 23° a las 14:00. 2° más cálido que ayer."
+- **Next 24 hours.** A temperature curve colored on one fixed scale, with rain probability bars and night bands. Scrub it with the pointer or the arrow keys.
+- **Next 7 days.** Ranges share the week's scale, so the rows compare at a glance.
+- **Details, each shown once:**
+  - air quality on the official EEA bands;
+  - sun arc with time left until sunset;
+  - wind compass with Beaufort scale and gusts;
+  - humidity and dew point;
+  - sea-level pressure;
+  - UV index on the WHO bands;
+  - rain today.
+- **Your cities.** Up to 6 favorites with live conditions and local time, fetched in a single request. Recent cities appear in the search box.
+- **Preferences.** °C/°F (wind in mph and rain in inches follow), light and dark themes, and `prefers-reduced-motion` is respected.
+
+## Motion, with a purpose
+
+| Where | What moves | Why |
+|---|---|---|
+| Favorite → city | The card grows into the city's sky window (shared `layoutId`), through the loading skeleton when needed | Keeps your place between views |
+| Temperature | Odometer digits roll (also when switching °C/°F) | Shows the change, not just the new value |
+| 24 hours | The line draws itself; rain bars rise hour by hour | Reads left to right like time |
+| 7 days | Ranges grow from each day's minimum, row by row | Compares the days |
+| Sun | The sun walks its arc up to the local hour | Shows how much day is left |
+| Wind | The needle swings in and wobbles with the gusts | Gustier wind, livelier needle |
+| Theme | The new theme spreads from the toggle (View Transitions) | Ties the change to its cause |
+
+Motion's features load in a separate chunk (`LazyMotion`). `MotionConfig reducedMotion="user"`, a CSS fallback and a single still frame of the sky cover reduced motion.
+
+## Stack
 
 | Layer | Technology |
-|-------|-----------|
-| Framework | React 19 |
-| Build tool | Vite 7 |
-| Styling | CSS-in-JS + CSS variables |
-| Weather data | [Open-Meteo](https://open-meteo.com) — free, no key |
-| Air quality | [Open-Meteo Air Quality API](https://open-meteo.com/en/docs/air-quality-api) |
-| Geocoding | [Open-Meteo Geocoding API](https://open-meteo.com/en/docs/geocoding-api) |
-| Fonts | Syne · IBM Plex Mono (Google Fonts) |
-| Deployment | Vercel |
+|---|---|
+| UI | React 19 |
+| Build | Vite 7 |
+| Motion | Motion 13 (`motion/react`, `LazyMotion` + `m`) |
+| Styling | Plain CSS per component + design tokens (light/dark) |
+| Routing | ~40-line router on `useSyncExternalStore` |
+| Weather, air quality, geocoding | [Open-Meteo](https://open-meteo.com) (free, no key, CC BY 4.0) |
+| "Use my location" | [BigDataCloud](https://www.bigdatacloud.com) client reverse geocoding (free, no key) |
+| Fonts | Syne · IBM Plex Mono |
+| Deploy | Vercel |
 
----
+## Data notes
 
-## Features
+- **Local time.** Open-Meteo answers in the city's wall-clock time without an offset (`timezone=auto`). Those strings are formatted as UTC so the browser never shifts them into the visitor's time zone. The clock in the main card runs from `utc_offset_seconds`, because `current.time` is the last 15-minute sample, not the time now.
+- **Units.** Wind comes in km/h, and pressure is sea-level (`pressure_msl`). All unit conversion happens on screen.
+- **Past day.** `past_days=1` provides yesterday's maximum for the comparison. The views find "today" by date, not by index.
+- **Favorites.** They store the GeoNames id and coordinates. Name-only favorites saved by the first version are resolved once with their country and upgraded.
+- **Your location.** It is only sent after you tap "Usar mi ubicación", rounded to ~1 km.
 
-- **Real-time weather** — temperature, feels like, humidity, wind, pressure, UV index, precipitation
-- **24-hour hourly forecast** — scrollable, with mini temperature bars and precipitation probability
-- **7-day forecast** — min/max range bars, weather icons, day-by-day breakdown
-- **Air Quality Index** — European AQI scale + PM2.5, PM10, Ozone, NO₂
-- **Dynamic background** — shifts between moods (clear, rain, storm, snow, fog) based on current conditions
-- **City search** — geocoding for any city in the world
-- **Favorite cities** — up to 3, with live conditions fetched in a single request
-- **City-local time** — dates, "Now" and sunrise/sunset use the city's clock, not the visitor's
-- **Zero API keys** — 100% free, open APIs
-- **Fully responsive** — desktop dashboard layout collapses gracefully to mobile
-
----
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- npm 9+
-
-### Installation
+## Getting started
 
 ```bash
-# Clone the repo
 git clone https://github.com/MiguelEscobar0345/MeAtmos.git
 cd MeAtmos
-
-# Install dependencies
 npm install
-
-# Start dev server
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) and search any city.
-
-### Build for production
+Open [http://localhost:5173](http://localhost:5173).
 
 ```bash
+npm run lint
 npm run build
 npm run preview
 ```
 
----
-
-## Project Structure
+## Project structure
 
 ```
-MeAtmos/
-├── public/
-│   ├── favicon.svg
-│   └── macaw.png           # Personal branding asset
-├── src/
-│   ├── components/
-│   │   ├── SearchBar.jsx         # City search input
-│   │   ├── CurrentWeather.jsx    # Main weather hero card
-│   │   ├── HourlyForecast.jsx    # 24h scrollable timeline
-│   │   ├── WeekForecast.jsx      # 7-day forecast rows
-│   │   ├── AirQuality.jsx        # AQI + pollutants panel
-│   │   ├── WeatherDetails.jsx    # Wind, pressure, UV, sunrise/sunset
-│   │   ├── FavoriteCities.jsx    # Saved cities with live temperature
-│   │   └── footer.jsx            # Personal links footer
-│   ├── hooks/
-│   │   ├── useWeather.js         # Geocoding + weather + air quality (parallel)
-│   │   └── useFavoritesWeather.js # One request for all saved cities
-│   ├── utils/
-│   │   ├── weatherCodes.js       # WMO codes, AQI levels, bg gradients
-│   │   └── formatters.js         # Temp, wind, date formatters
-│   ├── styles/
-│   │   └── globals.css           # CSS variables + keyframes
-│   ├── App.jsx
-│   └── main.jsx
-├── index.html
-├── vite.config.js
-├── vercel.json
-└── package.json
+src/
+├── api/            Open-Meteo calls and nearest-city lookup
+├── components/     One component per file, each with its own CSS
+├── hooks/          City data, suggestions, favorites, units, clock, theme
+├── styles/         tokens.css (palette, type, radii) and base.css
+├── utils/          Formatting, WMO codes, EEA/UV/Beaufort scales, sky engine, summary
+├── router.js       Routes, links and navigation
+└── main.jsx        LazyMotion + MotionConfig
 ```
 
----
+## Deploy
 
-## Deploy on Vercel
+Vercel with the Vite preset. `vercel.json` rewrites every path to `index.html`, so city URLs load directly:
 
-### Option 1 — Vercel CLI
-
-```bash
-npm i -g vercel
-vercel
+```json
+{ "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }
 ```
-
-### Option 2 — GitHub Import
-
-1. Push this repo to GitHub
-2. Go to [vercel.com](https://vercel.com) → **New Project** → Import your repo
-3. Set **Framework Preset** to `Vite`
-4. **Build Command:** `npm run build`
-5. **Output Directory:** `dist`
-6. Click **Deploy**
-
-The `vercel.json` handles client-side routing automatically.
-
----
-
-## APIs Used
-
-All endpoints are free and require no authentication.
-
-| API | Endpoint | Usage |
-|-----|----------|-------|
-| Open-Meteo Geocoding | `/v1/search` | Resolve city name → lat/lon |
-| Open-Meteo Forecast | `/v1/forecast` | Current + hourly + daily weather |
-| Open-Meteo Air Quality | `/v1/air-quality` | AQI, PM2.5, PM10, O₃, NO₂ |
-
-### WMO Weather Codes
-
-Weather conditions are interpreted from [WMO codes](https://open-meteo.com/en/docs) (0–99), mapped to human-readable labels, emojis, and background themes.
-
-### AQI Scale
-
-Uses the **European AQI** scale (0–100+):
-
-| Range | Level | Color |
-|-------|-------|-------|
-| 0–20 | Good | Green |
-| 21–40 | Fair | Blue |
-| 41–60 | Moderate | Amber |
-| 61–80 | Poor | Orange |
-| 81–100 | Very Poor | Red |
-| 100+ | Extremely poor | Purple |
-
----
-
-## Design Decisions
-
-**Why dark theme?**
-Weather data is inherently atmospheric — a dark canvas makes color-coded conditions (blue for rain, amber for UV, green for good air) pop with much more clarity than a light UI. It also differentiates this project visually from the MeDex Pokédex (light, Apple-inspired) in the portfolio.
-
-**Why IBM Plex Mono for data?**
-Monospaced fonts give numeric data visual rhythm and alignment. Temperature readings, AQI scores, and timestamps feel more precise and dashboard-like compared to proportional type.
-
-**Why no state management library?**
-The data flow is linear: search → geocode → fetch weather + AQ → render. Two custom hooks handle all async logic cleanly without needing Redux or Zustand.
-
----
 
 ## License
 
-MIT © [Miguel Escobar — miguesco](https://miguesco.dev)
+MIT © [Miguel Escobar, miguesco](https://miguesco.dev)

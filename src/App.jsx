@@ -6,6 +6,7 @@ import ErrorState from './components/ErrorState'
 import Footer from './components/Footer'
 import { usePath, parseRoute, navigate, cityPath } from './router'
 import { useCity, rememberLocation } from './hooks/useCity'
+import { addRecent } from './hooks/useRecents'
 import { useFavorites, sameCity, MAX_FAVORITES } from './hooks/useFavorites'
 import { useFavoritesWeather } from './hooks/useFavoritesWeather'
 import { useTheme } from './hooks/useTheme'
@@ -19,6 +20,10 @@ export default function App() {
   const { favorites, toggle, remove, replace } = useFavorites()
   const liveFor = useFavoritesWeather(favorites)
   const [theme, toggleTheme] = useTheme()
+
+  // Every city that finishes loading goes to the search's "Recientes"
+  const readyLocation = city.status === 'ready' ? city.location : null
+  useEffect(() => { addRecent(readyLocation) }, [readyLocation])
 
   const cityName = city.location?.name
   useEffect(() => {
@@ -50,7 +55,12 @@ export default function App() {
   return (
     <>
       <a href="#main" className="skip-link">Saltar al contenido</a>
-      <Header onSelectCity={openCity} theme={theme} onToggleTheme={toggleTheme} />
+      <Header
+        onSelectCity={openCity}
+        currentCityId={route.name === 'city' ? route.id : null}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+      />
 
       <main id="main" className="page main" tabIndex={-1}>
         {route.name === 'home' && (
