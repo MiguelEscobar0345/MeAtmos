@@ -4,72 +4,77 @@ import Home from './components/Home'
 import CityView, { CitySkeleton } from './components/CityView'
 import ErrorState from './components/ErrorState'
 import Footer from './components/Footer'
-import { useWeather } from './hooks/useWeather'
+import { usePath, parseRoute, navigate, cityPath } from './router'
+import { useCity, rememberLocation } from './hooks/useCity'
 import { useFavorites, sameCity, MAX_FAVORITES } from './hooks/useFavorites'
 import { useFavoritesWeather } from './hooks/useFavoritesWeather'
 import { useTheme } from './hooks/useTheme'
+import { geocode } from './api/openMeteo'
 
 const TITLE = 'MeAtmos by miguesco'
 
 export default function App() {
-  const { weather, aq, location, error, loading, search, open, retry, reset } = useWeather()
+  const route = parseRoute(usePath())
+  const city = useCity(route.name === 'city' ? route.id : null)
   const { favorites, toggle, remove, replace } = useFavorites()
   const liveFor = useFavoritesWeather(favorites)
   const [theme, toggleTheme] = useTheme()
 
-  const view = loading ? 'loading' : error ? 'error' : weather ? 'city' : 'home'
-  const isFavorite = location ? favorites.some(f => sameCity(f, location)) : false
-
+  const cityName = city.location?.name
   useEffect(() => {
-    document.title = view === 'city' ? `${location.name} · ${TITLE}` : `${TITLE} — El clima de cualquier ciudad`
-  }, [view, location])
+    document.title =
+      route.name === 'home' ? `${TITLE} — El clima de cualquier ciudad`
+        : cityName ? `${cityName} · ${TITLE}`
+          : TITLE
+  }, [route.name, cityName])
 
-  const openFavorite = async (fav) => {
-    if (fav.lat != null) return open(fav)
-    // Legacy entry (name only): resolve it once with its country, which the
-    // geocoder reads unambiguously, then store the full location
-    const loc = await search(`${fav.name}, ${fav.country}`)
-    if (loc && loc.country_code === fav.country_code) replace(fav, loc)
+  const openCity = (loc) => {
+    rememberLocation(loc)
+    navigate(cityPath(loc))
   }
 
-  const goHome = () => {
-    reset()
-    window.scrollTo({ top: 0 })
+  // Favorites saved before v2 only kept a name: resolve it once with its
+  // country (the geocoder reads "San José, Costa Rica" unambiguously)
+  const openLegacy = async (fav) => {
+    try {
+      const [loc] = await geocode(`${fav.name}, ${fav.country}`, { count: 1 })
+      if (loc && loc.country_code === fav.country_code) {
+        replace(fav, loc)
+        openCity(loc)
+      }
+    } catch { /* stays on the home page */ }
   }
+
+  const isFavorite = city.location ? favorites.some(f => sameCity(f, city.location)) : false
 
   return (
     <>
       <a href="#main" className="skip-link">Saltar al contenido</a>
-      <Header
-        onHome={goHome}
-        onSearch={search}
-        loading={loading}
-        theme={theme}
-        onToggleTheme={toggleTheme}
-      />
+      <Header onSelectCity={openCity} theme={theme} onToggleTheme={toggleTheme} />
 
-      <main id="main" className="page main">
-        {view === 'home' && (
+      <main id="main" className="page main" tabIndex={-1}>
+        {route.name === 'home' && (
           <Home
             favorites={favorites}
             liveFor={liveFor}
             max={MAX_FAVORITES}
-            onOpen={openFavorite}
+            onOpenLegacy={openLegacy}
             onRemove={remove}
           />
         )}
-        {view === 'loading' && <CitySkeleton />}
-        {view === 'error' && <ErrorState error={error} onRetry={retry} onHome={goHome} />}
-        {view === 'city' && (
+        {route.name === 'city' && city.status === 'loading' && <CitySkeleton location={city.location} />}
+        {route.name === 'city' && city.status === 'error' && <ErrorState type={city.error.type} onRetry={city.retry} />}
+        {route.name === 'city' && city.status === 'ready' && (
           <CityView
-            weather={weather}
-            aq={aq}
-            location={location}
+            weather={city.weather}
+            aq={city.aq}
+            location={city.location}
             isFavorite={isFavorite}
             canSave={favorites.length < MAX_FAVORITES}
-            onToggleFavorite={() => toggle(location)}
+            onToggleFavorite={() => toggle(city.location)}
           />
         )}
+        {route.name === 'not-found' && <ErrorState type="page" />}
       </main>
 
       <Footer />

@@ -29,10 +29,13 @@ export default function CityView({ weather, aq, location, isFavorite, canSave, o
   )
 }
 
-export function CitySkeleton() {
+// The name is often known before the forecast (suggestion, favorite, link)
+export function CitySkeleton({ location }) {
   return (
     <div className="city" aria-busy="true" aria-label="Cargando el clima">
-      <div className="skeleton city__sk-hero" />
+      <div className="skeleton city__sk-hero">
+        {location && <p className="city__sk-name">{location.name}</p>}
+      </div>
       <div className="skeleton city__sk-block" />
       <div className="city__grid">
         <div className="city__week skeleton city__sk-tall" />

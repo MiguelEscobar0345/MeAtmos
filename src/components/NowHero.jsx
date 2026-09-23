@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import WeatherIcon from './WeatherIcon'
 import Icon from './Icon'
 import { getWMO } from '../utils/weatherCodes'
@@ -12,6 +13,26 @@ export default function NowHero({ weather, location, isFavorite, canSave, onTogg
   const i   = todayIndex(weather)
   const country = countryName(location.country_code, location.country)
   const region  = location.admin1 && location.admin1 !== location.name ? `${location.admin1}, ` : ''
+
+  const [copied, setCopied] = useState(false)
+
+  // Native share sheet when there is one (phones, Edge/Safari), clipboard otherwise
+  const share = async () => {
+    const url = window.location.href
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `${location.name} · MeAtmos`, text: `El clima en ${location.name}: ${formatTemp(c.temperature_2m)}, ${wmo.label.toLowerCase()}`, url })
+        return
+      } catch (err) {
+        if (err.name === 'AbortError') return
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2200)
+    } catch { /* clipboard blocked: the URL is still in the address bar */ }
+  }
 
   const saveLabel = isFavorite ? 'Guardada' : 'Guardar'
   const saveHint = isFavorite
@@ -33,18 +54,25 @@ export default function NowHero({ weather, location, isFavorite, canSave, onTogg
             {formatDate(c.time)} · <span className="hero__clock"><span className="num">{formatClock(c.time)}</span> hora local</span>
           </p>
         </div>
-        <button
-          type="button"
-          className="save"
-          onClick={onToggleFavorite}
-          aria-pressed={isFavorite}
-          disabled={!isFavorite && !canSave}
-          title={saveHint}
-          aria-label={saveHint}
-        >
-          <Icon name="star" size={17} filled={isFavorite} />
-          <span>{saveLabel}</span>
-        </button>
+        <div className="hero__actions">
+          <button type="button" className="save" onClick={share} aria-label={`Compartir el clima de ${location.name}`}>
+            <Icon name={copied ? 'check' : 'share'} size={17} />
+            <span>{copied ? 'Enlace copiado' : 'Compartir'}</span>
+          </button>
+          <button
+            type="button"
+            className="save"
+            onClick={onToggleFavorite}
+            aria-pressed={isFavorite}
+            disabled={!isFavorite && !canSave}
+            title={saveHint}
+            aria-label={saveHint}
+          >
+            <Icon name="star" size={17} filled={isFavorite} />
+            <span>{saveLabel}</span>
+          </button>
+        </div>
+        <p className="visually-hidden" aria-live="polite">{copied ? 'Enlace copiado' : ''}</p>
       </div>
 
       <div className="hero__now">

@@ -14,6 +14,8 @@ const PATHS = {
   umbrella: <><path d="M3 12a9 9 0 0 1 18 0z" /><path d="M12 12v6.5a2 2 0 0 1-4 0" /></>,
   uv:       <><circle cx="12" cy="12" r="3.5" /><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4" /></>,
   home:     <><path d="M4 11 12 4l8 7" /><path d="M6 9.5V20h12V9.5" /></>,
+  share:    <><path d="M12 15V3.5" /><path d="m7.5 8 4.5-4.5L16.5 8" /><path d="M5 12.5V19a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19v-6.5" /></>,
+  check:    <path d="m5 12.5 4.5 4.5L19 7.5" />,
 }
 
 export default function Icon({ name, size = 20, filled = false, className = '' }) {

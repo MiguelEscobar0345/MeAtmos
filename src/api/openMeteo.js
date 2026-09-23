@@ -1,5 +1,6 @@
 // Open-Meteo: free, no key. Attribution (CC BY 4.0) lives in the footer.
 const GEO_API      = 'https://geocoding-api.open-meteo.com/v1/search'
+const GEO_GET_API  = 'https://geocoding-api.open-meteo.com/v1/get'
 const WEATHER_API  = 'https://api.open-meteo.com/v1/forecast'
 const AQ_API       = 'https://air-quality-api.open-meteo.com/v1/air-quality'
 
@@ -37,7 +38,21 @@ export async function geocode(query, { count = 6, signal } = {}) {
     if (seen.has(r.id)) continue
     ;((r.population ?? 0) > biggest ? lead : tail).push(r)
   }
-  return [...lead, ...esResults, ...tail].slice(0, count).map(toLocation)
+  // A leading English-only hit is shown first, so fetch its Spanish record
+  // ("New York" → Nueva York). Rare, and usually a single request.
+  const leadEs = await Promise.all(
+    lead.map(r => getJSON(`${GEO_GET_API}?id=${r.id}&language=es`, signal).catch(() => r)),
+  )
+  return [...leadEs, ...esResults, ...tail].slice(0, count).map(toLocation)
+}
+
+// A shared URL only carries the GeoNames id. The API answers 400 for ids it
+// doesn't know (or that aren't Int32), which is "not found", not a network error.
+export async function lookupLocation(id) {
+  const res = await fetch(`${GEO_GET_API}?id=${id}&language=es`)
+  if (res.status === 400) return null
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return toLocation(await res.json())
 }
 
 const CURRENT = [
