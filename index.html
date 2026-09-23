@@ -1,15 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Atmos — Weather Dashboard</title>
+    <title>MeAtmos by miguesco — El clima de cualquier ciudad, a la hora de allá</title>
+    <meta name="description" content="Busca una ciudad y mira su clima con la hora local: lluvia hora a hora, 7 días, viento, sol y calidad del aire. Hecho por miguesco." />
+    <meta name="author" content="Miguel Escobar (miguesco)" />
+    <meta property="og:site_name" content="miguesco" />
+    <meta property="og:title" content="MeAtmos by miguesco" />
+    <meta property="og:description" content="El clima de cualquier ciudad, a la hora de allá." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://me-atmos.vercel.app/" />
+    <meta name="theme-color" content="#f3f0e8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
+    <script>
+      // Apply the saved (or system) theme before the first paint to avoid a flash
+      (function () {
+        var theme
+        try { theme = localStorage.getItem('atmos_theme') } catch (e) { theme = null }
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        }
+        document.documentElement.dataset.theme = theme
+        document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#0b0e17' : '#f3f0e8'
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

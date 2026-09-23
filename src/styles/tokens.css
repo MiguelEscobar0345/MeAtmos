@@ -1,0 +1,73 @@
+/* ── Design tokens ──────────────────────────────────────────────
+   Light is "día": warm paper and night-ink text.
+   Dark is "noche": deep ink-blue.
+   The accent is the low sun (vermilion), not a UI blue. Contrast of every
+   text token is ≥ 4.5:1 on paper and surface in both themes. */
+
+:root {
+  color-scheme: light;
+
+  --paper:        #f3f0e8;
+  --surface:      #fbf9f4;
+  --surface-2:    #ebe7dc;
+  --ink:          #171a24;
+  --ink-2:        #545968;
+  --ink-3:        #686c79;
+  --line:         rgba(23, 26, 36, 0.1);
+  --line-strong:  rgba(23, 26, 36, 0.2);
+  --header-bg:    rgba(243, 240, 232, 0.82);
+
+  --accent:       #b83d1c;
+  --accent-ink:   #ffffff;
+  --accent-soft:  rgba(184, 61, 28, 0.1);
+  --sun:          #e39a2d;
+  --rain:         #2f67b8;
+  --rain-soft:    rgba(47, 103, 184, 0.16);
+  --star:         #d98a0b;
+  --danger:       #b3261e;
+
+  --shadow-1: 0 1px 2px rgba(23, 26, 36, 0.05), 0 12px 32px -20px rgba(23, 26, 36, 0.35);
+  --shadow-2: 0 2px 6px rgba(23, 26, 36, 0.08), 0 28px 56px -28px rgba(23, 26, 36, 0.5);
+
+  --font-display: 'Syne', system-ui, sans-serif;
+  --font-mono:    'IBM Plex Mono', ui-monospace, monospace;
+
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+  --r-pill: 999px;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur: 0.24s;
+
+  --page: 1200px;
+  --gutter: clamp(16px, 4vw, 32px);
+  --header-h: 68px;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --paper:        #0b0e17;
+  --surface:      #131725;
+  --surface-2:    #1b2032;
+  --ink:          #eef0f6;
+  --ink-2:        #a6acbd;
+  --ink-3:        #8a91a5;
+  --line:         rgba(238, 240, 246, 0.09);
+  --line-strong:  rgba(238, 240, 246, 0.18);
+  --header-bg:    rgba(11, 14, 23, 0.8);
+
+  --accent:       #ff8a5c;
+  --accent-ink:   #0b0e17;
+  --accent-soft:  rgba(255, 138, 92, 0.12);
+  --sun:          #f4b54e;
+  --rain:         #79a8ef;
+  --rain-soft:    rgba(121, 168, 239, 0.2);
+  --star:         #f4b54e;
+  --danger:       #ff8a80;
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-2: 0 2px 6px rgba(0, 0, 0, 0.35), 0 28px 56px -28px rgba(0, 0, 0, 0.8);
+}

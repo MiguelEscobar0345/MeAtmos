@@ -1,0 +1,100 @@
+.hourly { padding: 22px 22px 16px; }
+
+.hourly__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 16px;
+  margin-bottom: 10px;
+}
+
+.hourly__readout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  font-size: 0.9rem;
+  color: var(--ink-2);
+}
+
+.hourly__readout strong { color: var(--ink); font-weight: 700; }
+.hourly__readout .num:first-of-type { color: var(--ink); font-weight: 500; }
+.hourly__rain { color: var(--rain); }
+
+.hourly__chart {
+  position: relative;
+  height: 200px;
+  touch-action: pan-y;
+  cursor: crosshair;
+  border-radius: var(--r-md);
+  user-select: none;
+}
+
+.hourly__chart:focus-visible { outline-offset: 4px; }
+
+.hourly__night { fill: var(--surface-2); opacity: 0.7; }
+.hourly__bar   { fill: var(--rain); opacity: 0.35; }
+.hourly__area  { opacity: 0.14; }
+
+.hourly__line {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.hourly__guide {
+  stroke: var(--ink-3);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.hourly__dot {
+  fill: var(--surface);
+  stroke-width: 3;
+}
+
+/* Halo keeps labels readable where they cross the curve or a night band */
+.hourly__temp,
+.hourly__hour {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.hourly__temp { fill: var(--ink); font-weight: 500; }
+.hourly__hour { fill: var(--ink-3); }
+.hourly__tick.is-active .hourly__temp { font-size: 13px; font-weight: 600; }
+
+.hourly__legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: var(--ink-3);
+}
+
+.hourly__legend-bar,
+.hourly__legend-night {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--rain);
+  opacity: 0.45;
+}
+
+.hourly__legend-night {
+  margin-left: 12px;
+  background: var(--surface-2);
+  opacity: 1;
+  border: 1px solid var(--line);
+}
+
+@media (max-width: 640px) {
+  .hourly { padding: 18px 14px 14px; }
+}

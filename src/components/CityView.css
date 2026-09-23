@@ -1,0 +1,31 @@
+.city {
+  display: grid;
+  gap: 16px;
+}
+
+/* Bento: the week spans two columns next to the air card, then sun, wind
+   and details share the next row */
+.city__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+.city__week { grid-column: span 2; }
+.city__week > .week { height: 100%; }
+
+@media (max-width: 1020px) {
+  .city__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 680px) {
+  .city__grid { grid-template-columns: minmax(0, 1fr); }
+  .city__week { grid-column: auto; }
+}
+
+/* ── Skeleton ── */
+.city__sk-hero  { height: 360px; border-radius: var(--r-xl); }
+.city__sk-block { height: 280px; border-radius: var(--r-lg); }
+.city__sk-tall  { height: 440px; border-radius: var(--r-lg); }
+.city__sk-card  { height: 260px; border-radius: var(--r-lg); }

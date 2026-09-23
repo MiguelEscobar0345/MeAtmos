@@ -1,42 +1,35 @@
 import { useEffect, useState } from 'react'
-
-const WEATHER_API = 'https://api.open-meteo.com/v1/forecast'
+import { fetchCurrentMany } from '../api/openMeteo'
 
 export const favKey = (f) => (f.id != null ? `id:${f.id}` : `name:${f.name}|${f.country_code}`)
+const coordKey = (f) => `${f.lat},${f.lon}`
 
-// Current conditions for every saved city in ONE request: the forecast API
-// accepts comma-separated coordinates and answers with an array.
+// Live conditions for every saved city with ONE request
 export function useFavoritesWeather(favorites) {
   const [live, setLive] = useState({})
-  const withCoords = favorites.filter(f => f.lat != null && f.lon != null)
-  const query = withCoords.map(f => `${f.lat},${f.lon}`).join(';')
+  const query = favorites
+    .filter(f => f.lat != null && f.lon != null)
+    .map(coordKey)
+    .join(';')
 
   useEffect(() => {
     if (!query) return
-    let cancelled = false
-    const coords = query.split(';').map(c => c.split(','))
-    const params = new URLSearchParams({
-      latitude:  coords.map(c => c[0]).join(','),
-      longitude: coords.map(c => c[1]).join(','),
-      current:   'temperature_2m,weather_code,is_day',
-      timezone:  'auto',
+    const controller = new AbortController()
+    const coords = query.split(';').map(c => {
+      const [lat, lon] = c.split(',')
+      return { lat, lon }
     })
 
-    fetch(`${WEATHER_API}?${params}`)
-      .then(res => (res.ok ? res.json() : Promise.reject(res.status)))
-      .then(data => {
-        if (cancelled) return
-        const list = Array.isArray(data) ? data : [data]
+    fetchCurrentMany(coords, controller.signal)
+      .then(list => {
         const next = {}
-        list.forEach((entry, i) => {
-          next[`${coords[i][0]},${coords[i][1]}`] = entry.current
-        })
+        list.forEach((current, i) => { next[coordKey(coords[i])] = current })
         setLive(next)
       })
-      .catch(() => { /* cards fall back to their saved snapshot */ })
+      .catch(() => { /* cards keep their skeleton or saved snapshot */ })
 
-    return () => { cancelled = true }
+    return () => controller.abort()
   }, [query])
 
-  return (f) => (f.lat != null ? live[`${f.lat},${f.lon}`] : undefined)
+  return (f) => (f.lat != null ? live[coordKey(f)] : undefined)
 }
