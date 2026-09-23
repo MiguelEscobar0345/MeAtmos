@@ -1,7 +1,9 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { AnimatePresence, m } from 'motion/react'
 import Icon from './Icon'
 import { useSuggestions, fetchSuggestions, MIN_QUERY } from '../hooks/useSuggestions'
 import { countryName } from '../utils/formatters'
+import { EASE } from '../utils/motion'
 
 const fold = (s) => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
 
@@ -133,35 +135,43 @@ export default function SearchBar({ onSelect }) {
         {submitting ? 'Buscando…' : 'Buscar'}
       </button>
 
-      {showPanel && (message || hasList) && (
-        <div className="search__panel">
-          {hasList && (
-            <ul className="search__list" id={listId} role="listbox" aria-label="Ciudades encontradas">
-              {list.map((loc, i) => (
-                <li
-                  key={loc.id}
-                  id={`${listId}-${i}`}
-                  role="option"
-                  aria-selected={i === current}
-                  className="option"
-                  // Keep focus in the input so the click isn't lost to blur
-                  onMouseDown={e => e.preventDefault()}
-                  onMouseMove={() => { if (i !== current) setActive(i) }}
-                  onClick={() => choose(loc)}
-                >
-                  <span className="option__cc num" aria-hidden="true">{loc.country_code}</span>
-                  <span className="option__text">
-                    <span className="option__name"><Highlight text={loc.name} query={query} /></span>
-                    <span className="option__place">{place(loc)}</span>
-                  </span>
-                  <Icon name="arrowUpRight" size={16} className="option__go" />
-                </li>
-              ))}
-            </ul>
-          )}
-          {message && !hasList && <p className="search__msg">{message}</p>}
-        </div>
-      )}
+      <AnimatePresence>
+        {showPanel && (message || hasList) && (
+          <m.div
+            key="panel"
+            className="search__panel"
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0, transition: { duration: 0.2, ease: EASE } }}
+            exit={{ opacity: 0, y: -4, transition: { duration: 0.12 } }}
+          >
+            {hasList && (
+              <ul className="search__list" id={listId} role="listbox" aria-label="Ciudades encontradas">
+                {list.map((loc, i) => (
+                  <li
+                    key={loc.id}
+                    id={`${listId}-${i}`}
+                    role="option"
+                    aria-selected={i === current}
+                    className="option"
+                    // Keep focus in the input so the click isn't lost to blur
+                    onMouseDown={e => e.preventDefault()}
+                    onMouseMove={() => { if (i !== current) setActive(i) }}
+                    onClick={() => choose(loc)}
+                  >
+                    <span className="option__cc num" aria-hidden="true">{loc.country_code}</span>
+                    <span className="option__text">
+                      <span className="option__name"><Highlight text={loc.name} query={query} /></span>
+                      <span className="option__place">{place(loc)}</span>
+                    </span>
+                    <Icon name="arrowUpRight" size={16} className="option__go" />
+                  </li>
+                ))}
+              </ul>
+            )}
+            {message && !hasList && <p className="search__msg">{message}</p>}
+          </m.div>
+        )}
+      </AnimatePresence>
       <p className="visually-hidden" aria-live="polite">
         {showPanel && status === 'ready' ? `${list.length} ${list.length === 1 ? 'ciudad encontrada' : 'ciudades encontradas'}` : ''}
       </p>

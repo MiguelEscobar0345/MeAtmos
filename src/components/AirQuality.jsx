@@ -1,4 +1,8 @@
+import { m } from 'motion/react'
 import { AQI_LEVELS, getAQILevel } from '../utils/weatherCodes'
+import { SOFT, rise } from '../utils/motion'
+
+const reveal = { variants: rise, initial: 'hidden', whileInView: 'visible', viewport: { once: true, amount: 0.3 } }
 import './Conditions.css'
 
 const SCALE_MAX = 120 // six EEA bands of 20 points each
@@ -6,10 +10,10 @@ const SCALE_MAX = 120 // six EEA bands of 20 points each
 export default function AirQuality({ aq }) {
   if (aq?.european_aqi == null) {
     return (
-      <section className="card cond air" aria-labelledby="air-title">
+      <m.section className="card cond air" aria-labelledby="air-title" {...reveal}>
         <h2 id="air-title" className="eyebrow">Calidad del aire</h2>
         <p className="cond__empty">No hay datos de calidad del aire para este lugar.</p>
-      </section>
+      </m.section>
     )
   }
 
@@ -24,7 +28,7 @@ export default function AirQuality({ aq }) {
   ]
 
   return (
-    <section className="card cond air" aria-labelledby="air-title">
+    <m.section className="card cond air" aria-labelledby="air-title" {...reveal}>
       <h2 id="air-title" className="eyebrow">Calidad del aire</h2>
       <p className="air__score">
         <span className="cond__value">{aqi}</span>
@@ -37,7 +41,14 @@ export default function AirQuality({ aq }) {
 
       <div className="air__scale" aria-hidden="true">
         {AQI_LEVELS.map(l => <span key={l.label} className="air__band" style={{ '--c': l.color }} />)}
-        <span className="air__marker" style={{ '--pos': `${pos}%` }} />
+        {/* Slides from 0 to the index along the EEA bands */}
+        <m.span
+          className="air__marker"
+          variants={{
+            hidden: { '--pos': '0%' },
+            visible: { '--pos': `${pos}%`, transition: { ...SOFT, delay: 0.3 } },
+          }}
+        />
       </div>
       <div className="air__ticks num" aria-hidden="true">
         <span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>100+</span>
@@ -55,6 +66,6 @@ export default function AirQuality({ aq }) {
         ))}
       </dl>
       <p className="cond__note">Índice europeo (EEA): menos es mejor.</p>
-    </section>
+    </m.section>
   )
 }

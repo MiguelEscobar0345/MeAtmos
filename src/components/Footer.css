@@ -25,6 +25,17 @@
   transition: color var(--dur) ease;
 }
 
+.footer__mask {
+  display: inline-block;
+  overflow: hidden;
+  /* Room for the descender of the "g" inside the mask */
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+
+.footer__line { display: inline-block; }
+.footer__arrow-wrap { display: inline-flex; }
+
 .footer__arrow {
   width: 0.42em;
   height: 0.42em;
@@ -34,7 +45,18 @@
 }
 
 .footer__name:hover { color: var(--accent); }
-.footer__name:hover .footer__arrow { transform: translate(4px, -4px); }
+.footer__name:hover .footer__mask {
+  display: inline-block;
+  overflow: hidden;
+  /* Room for the descender of the "g" inside the mask */
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+
+.footer__line { display: inline-block; }
+.footer__arrow-wrap { display: inline-flex; }
+
+.footer__arrow { transform: translate(4px, -4px); }
 
 .footer__cols {
   display: flex;

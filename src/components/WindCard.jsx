@@ -1,8 +1,11 @@
+import { m } from 'motion/react'
 import { beaufort, windFrom } from '../utils/weatherCodes'
+import { rise } from '../utils/motion'
 import './Conditions.css'
 
 const TICKS = Array.from({ length: 24 }, (_, i) => i * 15)
 const LABELS = [['N', 0], ['E', 90], ['S', 180], ['O', 270]]
+const reveal = { variants: rise, initial: 'hidden', whileInView: 'visible', viewport: { once: true, amount: 0.3 } }
 
 export default function WindCard({ weather }) {
   const c = weather.current
@@ -10,9 +13,11 @@ export default function WindCard({ weather }) {
   const gusts = c.wind_gusts_10m != null ? Math.round(c.wind_gusts_10m) : null
   const from = c.wind_direction_10m
   const calm = speed < 1
+  // Gustier wind → livelier needle (degrees of wobble)
+  const wobble = Math.max(1, Math.min(7, ((gusts ?? speed) - speed) / 4))
 
   return (
-    <section className="card cond wind" aria-labelledby="wind-title">
+    <m.section className="card cond wind" aria-labelledby="wind-title" {...reveal}>
       <h2 id="wind-title" className="eyebrow">Viento</h2>
       <div className="wind__body">
         <svg className="wind__compass" viewBox="0 0 120 120" role="img"
@@ -32,12 +37,27 @@ export default function WindCard({ weather }) {
               <text key={l} className="wind__label" x={60 + Math.cos(rad) * 31} y={60 + Math.sin(rad) * 31 + 4} textAnchor="middle">{l}</text>
             )
           })}
-          {/* The arrow points where the wind goes: opposite to where it comes from */}
+          {/* The arrow points where the wind goes: it swings in from north like a
+              real needle, then keeps a small wobble. The invisible circle makes
+              each group's box centered on the compass, so rotation pivots there. */}
           {!calm && (
-            <g className="wind__arrow" transform={`rotate(${from + 180} 60 60)`}>
-              <line x1="60" y1="92" x2="60" y2="30" />
-              <path d="M60 22 67 36 60 32 53 36z" />
-            </g>
+            <m.g
+              className="wind__arrow"
+              variants={{
+                hidden: { rotate: 0 },
+                visible: { rotate: from + 180, transition: { type: 'spring', stiffness: 45, damping: 7, delay: 0.3 } },
+              }}
+            >
+              <circle cx="60" cy="60" r="50" fill="none" />
+              <m.g
+                animate={{ rotate: [-wobble, wobble] }}
+                transition={{ duration: 1.8, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' }}
+              >
+                <circle cx="60" cy="60" r="50" fill="none" />
+                <line x1="60" y1="92" x2="60" y2="30" />
+                <path d="M60 22 67 36 60 32 53 36z" />
+              </m.g>
+            </m.g>
           )}
           <circle className="wind__hub" cx="60" cy="60" r="3.5" />
         </svg>
@@ -51,6 +71,6 @@ export default function WindCard({ weather }) {
           {gusts != null && <p className="cond__sub">Ráfagas de <span className="num">{gusts} km/h</span></p>}
         </div>
       </div>
-    </section>
+    </m.section>
   )
 }

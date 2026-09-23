@@ -202,6 +202,8 @@
 
 /* ── Theme toggle ── */
 .theme-toggle {
+  position: relative;
+  overflow: hidden;
   flex-shrink: 0;
   width: 42px;
   height: 42px;
@@ -212,6 +214,8 @@
   color: var(--ink-2);
   transition: color var(--dur) ease, border-color var(--dur) ease, background-color var(--dur) ease;
 }
+
+.theme-toggle__icon { display: grid; }
 
 .theme-toggle:hover {
   color: var(--ink);

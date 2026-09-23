@@ -23,7 +23,8 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // `m` is Motion's lazy component factory, used as <m.div>
+      'no-unused-vars': ['error', { varsIgnorePattern: '^([A-Z_]|m$)' }],
     },
   },
 ])
