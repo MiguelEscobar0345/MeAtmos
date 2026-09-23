@@ -1,7 +1,7 @@
 import { m } from 'motion/react'
 import Icon from './Icon'
 import { getUVLevel } from '../utils/weatherCodes'
-import { formatTemp } from '../utils/formatters'
+import { useUnits } from '../hooks/useUnits'
 import { todayIndex } from '../utils/forecast'
 import { rise } from '../utils/motion'
 import './Conditions.css'
@@ -10,6 +10,7 @@ export default function DetailsCard({ weather }) {
   const c = weather.current
   const d = weather.daily
   const i = todayIndex(weather)
+  const units = useUnits()
   const uv = getUVLevel(c.uv_index ?? 0)
   const uvMax = d.uv_index_max[i]
   const uvMaxLevel = getUVLevel(uvMax ?? 0)
@@ -21,7 +22,7 @@ export default function DetailsCard({ weather }) {
       icon: 'droplet',
       label: 'Humedad',
       value: <>{c.relative_humidity_2m}<span className="cond__unit">%</span></>,
-      sub: `Punto de rocío ${formatTemp(c.dew_point_2m)}`,
+      sub: `Punto de rocío ${units.fmtTemp(c.dew_point_2m)}`,
     },
     {
       icon: 'gauge',
@@ -46,7 +47,7 @@ export default function DetailsCard({ weather }) {
     {
       icon: 'umbrella',
       label: 'Lluvia hoy',
-      value: <>{rainToday.toFixed(1)}<span className="cond__unit"> mm</span></>,
+      value: <>{units.rain(rainToday)}<span className="cond__unit"> {units.rainUnit}</span></>,
       sub: rainChance != null ? `Probabilidad ${rainChance}%` : '',
     },
   ]

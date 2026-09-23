@@ -2,6 +2,8 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { AnimatePresence, m } from 'motion/react'
 import Icon from './Icon'
 import { useSuggestions, fetchSuggestions, MIN_QUERY } from '../hooks/useSuggestions'
+import { useRecents } from '../hooks/useRecents'
+import { nearestCity } from '../api/nearestCity'
 import { countryName } from '../utils/formatters'
 import { EASE } from '../utils/motion'
 
@@ -19,22 +21,38 @@ const place = (loc) =>
     .filter(Boolean)
     .join(', ')
 
-// Combobox with list autocomplete (WAI-ARIA APG pattern)
-export default function SearchBar({ onSelect }) {
+const GEO_MESSAGES = {
+  locating: 'Buscando tu ubicación…',
+  denied: 'No diste permiso de ubicación. Busca tu ciudad por nombre.',
+  error: 'No pudimos obtener tu ubicación. Inténtalo de nuevo.',
+  none: 'No encontramos una ciudad cerca de ti.',
+}
+
+const canLocate = typeof navigator !== 'undefined' && 'geolocation' in navigator
+
+// Combobox with list autocomplete (WAI-ARIA APG pattern). Empty, it offers
+// your location and the cities you opened last.
+export default function SearchBar({ onSelect, currentId }) {
   const [value, setValue] = useState('')
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(-1)
   const [submitting, setSubmitting] = useState(false)
   // Outcome of pressing Enter before the dropdown had results
   const [submitMsg, setSubmitMsg] = useState(null)
+  const [geo, setGeo] = useState('idle')
   const inputRef = useRef(null)
   const listId = useId()
   const { status, list } = useSuggestions(value)
+  // The city on screen isn't a useful shortcut
+  const recents = useRecents().filter(loc => String(loc.id) !== currentId)
 
   const query = value.trim()
-  const showPanel = open && query.length >= MIN_QUERY
-  const hasList = showPanel && list.length > 0
-  const current = active >= 0 && active < list.length ? active : -1
+  const searching = query.length >= MIN_QUERY
+  const options = searching
+    ? list.map(loc => ({ kind: 'city', loc }))
+    : query ? [] : [...(canLocate ? [{ kind: 'locate' }] : []), ...recents.map(loc => ({ kind: 'recent', loc }))]
+  const hasList = open && options.length > 0
+  const current = active >= 0 && active < options.length ? active : -1
 
   // "/" or Ctrl/⌘+K jumps to the search box from anywhere
   useEffect(() => {
@@ -54,14 +72,35 @@ export default function SearchBar({ onSelect }) {
     setOpen(false)
     setActive(-1)
     setSubmitMsg(null)
+    setGeo('idle')
     inputRef.current?.blur()
     onSelect(loc)
   }
 
+  const locate = () => {
+    setGeo('locating')
+    navigator.geolocation.getCurrentPosition(
+      async ({ coords }) => {
+        try {
+          const loc = await nearestCity(coords.latitude, coords.longitude)
+          if (loc) choose(loc)
+          else setGeo('none')
+        } catch {
+          setGeo('error')
+        }
+      },
+      (err) => setGeo(err.code === err.PERMISSION_DENIED ? 'denied' : 'error'),
+      { timeout: 12000, maximumAge: 10 * 60 * 1000 },
+    )
+  }
+
+  const pick = (option) => (option.kind === 'locate' ? locate() : choose(option.loc))
+
   const submit = async (e) => {
     e.preventDefault()
+    if (current >= 0) return pick(options[current])
     if (!query) return
-    if (list.length && status === 'ready') return choose(list[Math.max(current, 0)])
+    if (list.length && status === 'ready') return choose(list[0])
     // Enter before the suggestions arrived: ask directly (shares their cache)
     setSubmitting(true)
     try {
@@ -79,25 +118,35 @@ export default function SearchBar({ onSelect }) {
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault()
       setOpen(true)
-      if (!list.length) return
+      if (!options.length) return
       const step = e.key === 'ArrowDown' ? 1 : -1
       setActive(current === -1
-        ? (step === 1 ? 0 : list.length - 1)
-        : (current + step + list.length) % list.length)
+        ? (step === 1 ? 0 : options.length - 1)
+        : (current + step + options.length) % options.length)
+    } else if (e.key === 'Enter' && hasList && current >= 0) {
+      // Handled here: with an empty query the submit button is disabled,
+      // which blocks the form's implicit submission
+      e.preventDefault()
+      pick(options[current])
     } else if (e.key === 'Escape') {
-      if (showPanel) setOpen(false)
+      // Search inputs clear themselves on Esc; first close, clear on the second
+      e.preventDefault()
+      if (open) setOpen(false)
       else setValue('')
       setActive(-1)
     }
   }
 
   const sent = submitMsg?.query === query ? submitMsg.type : null
-  const message =
-    status === 'error' || sent === 'error' ? 'No pudimos buscar. Revisa tu conexión.'
+  const message = !searching ? null
+    : status === 'error' || sent === 'error' ? 'No pudimos buscar. Revisa tu conexión.'
       : (status === 'ready' && !list.length) || sent === 'empty'
         ? `Sin resultados para «${query}». Prueba agregando el país: «Valencia, Venezuela».`
         : status === 'loading' && !list.length ? 'Buscando…'
           : null
+  const showPanel = open && (hasList || message)
+  const optionId = (i) => `${listId}-${i}`
+  const firstRecent = options.findIndex(o => o.kind === 'recent')
 
   return (
     <form className="search" role="search" onSubmit={submit}>
@@ -117,7 +166,7 @@ export default function SearchBar({ onSelect }) {
           aria-autocomplete="list"
           aria-expanded={hasList}
           aria-controls={listId}
-          aria-activedescendant={hasList && current >= 0 ? `${listId}-${current}` : undefined}
+          aria-activedescendant={hasList && current >= 0 ? optionId(current) : undefined}
           value={value}
           onChange={e => {
             setValue(e.target.value)
@@ -136,7 +185,7 @@ export default function SearchBar({ onSelect }) {
       </button>
 
       <AnimatePresence>
-        {showPanel && (message || hasList) && (
+        {showPanel && (
           <m.div
             key="panel"
             className="search__panel"
@@ -145,27 +194,52 @@ export default function SearchBar({ onSelect }) {
             exit={{ opacity: 0, y: -4, transition: { duration: 0.12 } }}
           >
             {hasList && (
-              <ul className="search__list" id={listId} role="listbox" aria-label="Ciudades encontradas">
-                {list.map((loc, i) => (
-                  <li
-                    key={loc.id}
-                    id={`${listId}-${i}`}
-                    role="option"
-                    aria-selected={i === current}
-                    className="option"
+              <ul
+                className="search__list"
+                id={listId}
+                role="listbox"
+                aria-label={searching ? 'Ciudades encontradas' : 'Tu ubicación y ciudades recientes'}
+              >
+                {options.map((option, i) => {
+                  const common = {
+                    id: optionId(i),
+                    role: 'option',
+                    'aria-selected': i === current,
+                    className: 'option',
                     // Keep focus in the input so the click isn't lost to blur
-                    onMouseDown={e => e.preventDefault()}
-                    onMouseMove={() => { if (i !== current) setActive(i) }}
-                    onClick={() => choose(loc)}
-                  >
-                    <span className="option__cc num" aria-hidden="true">{loc.country_code}</span>
-                    <span className="option__text">
-                      <span className="option__name"><Highlight text={loc.name} query={query} /></span>
-                      <span className="option__place">{place(loc)}</span>
-                    </span>
-                    <Icon name="arrowUpRight" size={16} className="option__go" />
-                  </li>
-                ))}
+                    onMouseDown: e => e.preventDefault(),
+                    onMouseMove: () => { if (i !== current) setActive(i) },
+                    onClick: () => pick(option),
+                  }
+                  if (option.kind === 'locate') {
+                    return (
+                      <li key="locate" {...common} className="option option--locate">
+                        <span className="option__cc" aria-hidden="true"><Icon name="locate" size={15} /></span>
+                        <span className="option__text">
+                          <span className="option__name">Usar mi ubicación</span>
+                          <span className="option__place">
+                            {GEO_MESSAGES[geo] ?? 'Tu navegador te pedirá permiso'}
+                          </span>
+                        </span>
+                        <Icon name="arrowUpRight" size={16} className="option__go" />
+                      </li>
+                    )
+                  }
+                  const { loc } = option
+                  return [
+                    i === firstRecent && (
+                      <li key="recent-heading" role="presentation" className="search__heading">Recientes</li>
+                    ),
+                    <li key={`${option.kind}-${loc.id}`} {...common}>
+                      <span className="option__cc num" aria-hidden="true">{loc.country_code}</span>
+                      <span className="option__text">
+                        <span className="option__name"><Highlight text={loc.name} query={query} /></span>
+                        <span className="option__place">{place(loc)}</span>
+                      </span>
+                      <Icon name="arrowUpRight" size={16} className="option__go" />
+                    </li>,
+                  ]
+                })}
               </ul>
             )}
             {message && !hasList && <p className="search__msg">{message}</p>}
@@ -173,7 +247,8 @@ export default function SearchBar({ onSelect }) {
         )}
       </AnimatePresence>
       <p className="visually-hidden" aria-live="polite">
-        {showPanel && status === 'ready' ? `${list.length} ${list.length === 1 ? 'ciudad encontrada' : 'ciudades encontradas'}` : ''}
+        {searching && open && status === 'ready' ? `${list.length} ${list.length === 1 ? 'ciudad encontrada' : 'ciudades encontradas'}` : ''}
+        {geo !== 'idle' ? GEO_MESSAGES[geo] : ''}
       </p>
     </form>
   )

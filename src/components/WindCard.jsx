@@ -1,6 +1,7 @@
 import { m } from 'motion/react'
 import { beaufort, windFrom } from '../utils/weatherCodes'
 import { rise } from '../utils/motion'
+import { useUnits } from '../hooks/useUnits'
 import './Conditions.css'
 
 const TICKS = Array.from({ length: 24 }, (_, i) => i * 15)
@@ -9,6 +10,7 @@ const reveal = { variants: rise, initial: 'hidden', whileInView: 'visible', view
 
 export default function WindCard({ weather }) {
   const c = weather.current
+  const units = useUnits()
   const speed = Math.round(c.wind_speed_10m)
   const gusts = c.wind_gusts_10m != null ? Math.round(c.wind_gusts_10m) : null
   const from = c.wind_direction_10m
@@ -63,12 +65,12 @@ export default function WindCard({ weather }) {
         </svg>
 
         <div>
-          <p className="cond__value">{speed}<span className="cond__unit"> km/h</span></p>
+          <p className="cond__value">{units.wind(c.wind_speed_10m)}<span className="cond__unit"> {units.windUnit}</span></p>
           <p className="cond__lead">{beaufort(c.wind_speed_10m)}</p>
           <p className="cond__sub">
             {calm ? 'Aire en calma' : `Viene del ${windFrom(from)} (${Math.round(from)}°)`}
           </p>
-          {gusts != null && <p className="cond__sub">Ráfagas de <span className="num">{gusts} km/h</span></p>}
+          {gusts != null && <p className="cond__sub">Ráfagas de <span className="num">{units.wind(gusts)} {units.windUnit}</span></p>}
         </div>
       </div>
     </m.section>

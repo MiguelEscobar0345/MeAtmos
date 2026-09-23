@@ -2,7 +2,8 @@ import { useId, useRef, useState } from 'react'
 import { m } from 'motion/react'
 import WeatherIcon from './WeatherIcon'
 import { getWMO } from '../utils/weatherCodes'
-import { formatTemp, formatClock } from '../utils/formatters'
+import { formatClock } from '../utils/formatters'
+import { useUnits } from '../hooks/useUnits'
 import { nextHours } from '../utils/forecast'
 import { tempColor } from '../utils/temperature'
 import { smoothPath, runs } from '../utils/chart'
@@ -20,14 +21,15 @@ const BAR_BOTTOM = 166
 const LABEL_Y = 188
 const FOLLOW = { type: 'spring', stiffness: 500, damping: 40 }
 
-const describe = (h, i) =>
-  `${i === 0 ? 'Ahora' : formatClock(h.time)}, ${formatTemp(h.temp)}, ${getWMO(h.code).label.toLowerCase()}, ${h.precip}% de probabilidad de lluvia`
+const describe = (h, i, fmtTemp) =>
+  `${i === 0 ? 'Ahora' : formatClock(h.time)}, ${fmtTemp(h.temp)}, ${getWMO(h.code).label.toLowerCase()}, ${h.precip}% de probabilidad de lluvia`
 
 export default function HourlyChart({ weather }) {
   const wrapRef = useRef(null)
   const width = useElementWidth(wrapRef)
   const [active, setActive] = useState(0)
   const gradId = useId()
+  const { fmtTemp } = useUnits()
   const hours = nextHours(weather)
   const n = hours.length
   const current = hours[Math.min(active, n - 1)]
@@ -76,7 +78,7 @@ export default function HourlyChart({ weather }) {
         <h2 id="hourly-title" className="eyebrow">Próximas 24 horas</h2>
         <p className="hourly__readout" aria-hidden="true">
           <strong>{active === 0 ? 'Ahora' : formatClock(current.time)}</strong>
-          <span className="num">{formatTemp(current.temp)}</span>
+          <span className="num">{fmtTemp(current.temp)}</span>
           <span>{getWMO(current.code).label}</span>
           <span className="hourly__rain num">{current.precip}% lluvia</span>
         </p>
@@ -91,7 +93,7 @@ export default function HourlyChart({ weather }) {
         aria-valuemin={0}
         aria-valuemax={n - 1}
         aria-valuenow={active}
-        aria-valuetext={describe(current, active)}
+        aria-valuetext={describe(current, active, fmtTemp)}
         onKeyDown={onKeyDown}
         onPointerMove={onPointer}
         onPointerDown={onPointer}
@@ -169,7 +171,7 @@ export default function HourlyChart({ weather }) {
                   <WeatherIcon icon={getWMO(h.code).icon} isDay={h.isDay} size={24} x={x(i) - 12} y={ICON_Y} />
                 )}
                 <text className="hourly__temp" x={x(i)} y={y(h.temp) - 12} textAnchor="middle">
-                  {formatTemp(h.temp)}
+                  {fmtTemp(h.temp)}
                 </text>
                 {i % every === 0 && (
                   <text className="hourly__hour" x={x(i)} y={LABEL_Y} textAnchor="middle">

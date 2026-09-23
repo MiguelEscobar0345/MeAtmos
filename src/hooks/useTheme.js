@@ -32,7 +32,8 @@ export function useTheme() {
     transition.ready.then(() => {
       document.documentElement.animate(
         { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${r}px at ${x}px ${y}px)`] },
-        { duration: 600, easing: `cubic-bezier(${EASE.join(',')})`, pseudoElement: '::view-transition-new(root)' },
+        // Short: the page doesn't take clicks while a view transition runs
+        { duration: 450, easing: `cubic-bezier(${EASE.join(',')})`, pseudoElement: '::view-transition-new(root)' },
       )
     })
   }, [])

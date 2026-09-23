@@ -5,10 +5,13 @@ import Icon from './Icon'
 import Sky from './Sky'
 import RollingNumber from './RollingNumber'
 import { getWMO } from '../utils/weatherCodes'
-import { formatTemp, formatDate, formatClock, countryName } from '../utils/formatters'
+import { formatDate, formatClock, countryName } from '../utils/formatters'
 import { skyName } from '../utils/sky'
 import { todayIndex } from '../utils/forecast'
 import { EASE, rise, stagger } from '../utils/motion'
+import { summarize } from '../utils/summary'
+import { useUnits } from '../hooks/useUnits'
+import { useCityNow } from '../hooks/useClock'
 import './NowHero.css'
 
 // Six sparks around the star when a city is saved
@@ -20,6 +23,8 @@ export default function NowHero({ weather, location, isFavorite, canSave, onTogg
   const i   = todayIndex(weather)
   const country = countryName(location.country_code, location.country)
   const region  = location.admin1 && location.admin1 !== location.name ? `${location.admin1}, ` : ''
+  const units   = useUnits()
+  const now     = useCityNow(weather.utc_offset_seconds)
 
   const [copied, setCopied] = useState(false)
   const [burst, setBurst] = useState(0)
@@ -29,7 +34,7 @@ export default function NowHero({ weather, location, isFavorite, canSave, onTogg
     const url = window.location.href
     if (navigator.share) {
       try {
-        await navigator.share({ title: `${location.name} · MeAtmos`, text: `El clima en ${location.name}: ${formatTemp(c.temperature_2m)}, ${wmo.label.toLowerCase()}`, url })
+        await navigator.share({ title: `${location.name} · MeAtmos`, text: `El clima en ${location.name}: ${units.fmtTemp(c.temperature_2m)}, ${wmo.label.toLowerCase()}`, url })
         return
       } catch (err) {
         if (err.name === 'AbortError') return
@@ -75,7 +80,7 @@ export default function NowHero({ weather, location, isFavorite, canSave, onTogg
             </p>
             <h1 id="hero-city" className="hero__city">{location.name}</h1>
             <p className="hero__time">
-              {formatDate(c.time)} · <span className="hero__clock"><span className="num">{formatClock(c.time)}</span> hora local</span>
+              {formatDate(now)} · <span className="hero__clock"><span className="num">{formatClock(now)}</span> hora local</span>
             </p>
           </m.div>
           <m.div className="hero__actions" variants={rise}>
@@ -127,7 +132,7 @@ export default function NowHero({ weather, location, isFavorite, canSave, onTogg
 
         <m.div className="hero__now" variants={rise}>
           <p className="hero__temp">
-            <RollingNumber value={Math.round(c.temperature_2m)} suffix="°" />
+            <RollingNumber value={Math.round(units.temp(c.temperature_2m))} suffix="°" />
           </p>
           <m.div
             className="hero__icon-wrap"
@@ -142,12 +147,13 @@ export default function NowHero({ weather, location, isFavorite, canSave, onTogg
         <m.div className="hero__foot" variants={rise}>
           <p className="hero__cond">{wmo.label}</p>
           <p className="hero__range">
-            Sensación <span className="num">{formatTemp(c.apparent_temperature)}</span>
+            Sensación <span className="num">{units.fmtTemp(c.apparent_temperature)}</span>
             <span aria-hidden="true"> · </span>
-            Máx <span className="num">{formatTemp(weather.daily.temperature_2m_max[i])}</span>
+            Máx <span className="num">{units.fmtTemp(weather.daily.temperature_2m_max[i])}</span>
             <span aria-hidden="true"> · </span>
-            Mín <span className="num">{formatTemp(weather.daily.temperature_2m_min[i])}</span>
+            Mín <span className="num">{units.fmtTemp(weather.daily.temperature_2m_min[i])}</span>
           </p>
+          <p className="hero__summary">{summarize(weather, units)}</p>
         </m.div>
       </m.div>
     </m.section>

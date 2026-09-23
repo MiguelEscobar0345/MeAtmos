@@ -76,6 +76,8 @@ export function fetchForecast(loc) {
     daily:     DAILY.join(','),
     timezone:  'auto',
     forecast_days: 7,
+    // Yesterday, for "warmer than yesterday"; views locate today by date
+    past_days: 1,
   })
   return getJSON(`${WEATHER_API}?${params}`)
 }
@@ -100,5 +102,6 @@ export async function fetchCurrentMany(coords, signal) {
     timezone:  'auto',
   })
   const data = await getJSON(`${WEATHER_API}?${params}`, signal)
-  return (Array.isArray(data) ? data : [data]).map(d => d.current)
+  // The offset lets each card run the city's own clock
+  return (Array.isArray(data) ? data : [data]).map(d => ({ ...d.current, offset: d.utc_offset_seconds }))
 }

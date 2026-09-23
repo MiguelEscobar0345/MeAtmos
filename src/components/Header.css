@@ -194,13 +194,32 @@
 .option__go { color: var(--ink-3); opacity: 0; transition: opacity var(--dur) ease; }
 .option[aria-selected='true'] .option__go { opacity: 1; color: var(--accent); }
 
+.search__heading {
+  padding: 10px 10px 4px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.option--locate .option__cc { color: var(--accent); }
+
 .search__msg {
   padding: 12px 14px;
   font-size: 0.88rem;
   color: var(--ink-2);
 }
 
-/* ── Theme toggle ── */
+/* ── Units and theme toggles ── */
+.header__tools {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.units-toggle { font-size: 0.85rem; font-weight: 500; }
+
 .theme-toggle {
   position: relative;
   overflow: hidden;
@@ -234,8 +253,13 @@
     padding-block: 10px 12px;
   }
 
-  .logo__by { display: inline; }
-  .theme-toggle { margin-left: auto; width: 38px; height: 38px; }
+  /* Logo, signature and both toggles share one row down to 360px */
+  .logo { gap: 7px; }
+  .logo-mark { width: 26px; height: 26px; }
+  .logo__word { font-size: 1.02rem; }
+  .logo__by { display: inline; padding-left: 7px; font-size: 0.66rem; }
+  .header__tools { margin-left: auto; gap: 6px; }
+  .theme-toggle { width: 36px; height: 36px; }
 
   .search {
     order: 3;
@@ -244,4 +268,18 @@
   }
 
   .search__kbd { display: none; }
+}
+
+/* Narrow phones: the signature stacks under the wordmark instead of beside it */
+@media (max-width: 380px) {
+  .logo {
+    display: grid;
+    grid-template-columns: auto auto;
+    column-gap: 7px;
+    row-gap: 1px;
+  }
+
+  .logo-mark { grid-row: span 2; align-self: center; }
+  .logo__word { line-height: 1.1; }
+  .logo__by { padding-left: 0; border-left: 0; line-height: 1.1; }
 }
