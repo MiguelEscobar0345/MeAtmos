@@ -8,7 +8,7 @@ import WeatherDetails from './components/WeatherDetails'
 import FavoriteCities from './components/FavoriteCities'
 import Footer from './components/footer'
 import { useWeather } from './hooks/useWeather'
-import { useAirQuality } from './hooks/useAirQuality'
+import { useFavoritesWeather, favKey } from './hooks/useFavoritesWeather'
 import { getWMO, BG_GRADIENTS } from './utils/weatherCodes'
 
 // ── Constants ──
@@ -33,62 +33,55 @@ function saveFavs(favs) {
   }
 }
 
+// Favorites saved before v2 only kept the name, which is ambiguous
+// (San José CR vs San Jose US): match those by name + country instead of id
+const sameCity = (fav, loc) =>
+  fav.id != null
+    ? fav.id === loc.id
+    : fav.name === loc.name && fav.country_code === loc.country_code
+
 // ── Component ──
 export default function App() {
-  const { weather, location, loading, error, search } = useWeather()
-  const { aq } = useAirQuality(location?.lat, location?.lon)
+  const { weather, aq, location, loading, error, search, open } = useWeather()
   const [favorites, setFavorites] = useState(loadFavs)
+  const liveFor = useFavoritesWeather(favorites)
 
-  React.useEffect(() => {
-    if (!weather || !location) return
-  
+  const updateFavs = (fn) => {
     setFavorites(prev => {
-      const exists = prev.some(f => f.name === location.name)
-      if (!exists) return prev
-      const next = prev.map(f =>
-        f.name === location.name
-          ? { ...f, temp: weather.current.temperature_2m, weatherCode: weather.current.weather_code }
-          : f
-      )
-      saveFavs(next)
-      return next
-    })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  const group = weather ? getWMO(weather.current.weather_code).group : 'clear'
-  const bg    = BG_GRADIENTS[group]
-
-  const isFavorite = location
-    ? favorites.some(f => f.name === location.name)
-    : false
-
-  const toggleFavorite = () => {
-    if (!location || !weather) return
-    setFavorites(prev => {
-      let next
-      if (prev.some(f => f.name === location.name)) {
-        next = prev.filter(f => f.name !== location.name)
-      } else {
-        if (prev.length >= MAX_FAVORITES) return prev
-        next = [...prev, {
-          name:         location.name,
-          country:      location.country,
-          country_code: location.country_code,
-          temp:         weather.current.temperature_2m,
-          weatherCode:  weather.current.weather_code,
-        }]
-      }
-      saveFavs(next)
+      const next = fn(prev)
+      if (next !== prev) saveFavs(next)
       return next
     })
   }
 
-  const removeFavorite = (name) => {
-    setFavorites(prev => {
-      const next = prev.filter(f => f.name !== name)
-      saveFavs(next)
-      return next
+  const group = weather ? getWMO(weather.current.weather_code, weather.current.is_day).group : 'clear'
+  const bg    = BG_GRADIENTS[group]
+
+  const isFavorite = location
+    ? favorites.some(f => sameCity(f, location))
+    : false
+
+  const toggleFavorite = () => {
+    if (!location || !weather) return
+    updateFavs(prev => {
+      if (prev.some(f => sameCity(f, location))) return prev.filter(f => !sameCity(f, location))
+      if (prev.length >= MAX_FAVORITES) return prev
+      return [...prev, location]
     })
+  }
+
+  const removeFavorite = (fav) => {
+    updateFavs(prev => prev.filter(f => favKey(f) !== favKey(fav)))
+  }
+
+  const selectFavorite = async (fav) => {
+    if (fav.lat != null) return open(fav)
+    // Legacy entry: resolve it once ("San José, Costa Rica" is unambiguous
+    // for the geocoder), then store the full location
+    const loc = await search(`${fav.name}, ${fav.country}`)
+    if (loc && loc.country_code === fav.country_code) {
+      updateFavs(prev => prev.map(f => (favKey(f) === favKey(fav) ? loc : f)))
+    }
   }
 
   return (
@@ -197,7 +190,8 @@ export default function App() {
               </div>
               <FavoriteCities
                 favorites={favorites}
-                onSelect={search}
+                liveFor={liveFor}
+                onSelect={selectFavorite}
                 onRemove={removeFavorite}
               />
             </div>
@@ -225,7 +219,7 @@ export default function App() {
           )}
 
           {/* Dashboard */}
-          {weather && !loading && (
+          {weather && !loading && !error && (
             <div className="dash-grid" style={{
               display: 'grid',
               gridTemplateColumns: '1fr 320px',

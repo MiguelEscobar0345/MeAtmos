@@ -1,20 +1,21 @@
 import React, { useRef } from 'react'
 import { getWMO } from '../utils/weatherCodes'
-import { formatTemp, formatHour } from '../utils/formatters'
+import { formatTemp, formatHour, currentHour } from '../utils/formatters'
 
 export default function HourlyForecast({ weather }) {
   const scrollRef = useRef(null)
-  const now = new Date()
-
-  // Get next 24 hours
+  // Next 24 hours starting at the city's current hour. Both strings are the
+  // city's wall clock, so they compare directly without Date conversions.
+  const nowHour = currentHour(weather.current.time)
   const hours = weather.hourly.time
     .map((t, i) => ({
       time: t,
       temp: weather.hourly.temperature_2m[i],
       code: weather.hourly.weather_code[i],
+      isDay: weather.hourly.is_day[i],
       precip: weather.hourly.precipitation_probability[i],
     }))
-    .filter(h => new Date(h.time) >= now)
+    .filter(h => h.time >= nowHour)
     .slice(0, 24)
 
   const temps = hours.map(h => h.temp)
@@ -38,7 +39,7 @@ export default function HourlyForecast({ weather }) {
         style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4 }}
       >
         {hours.map((h, i) => {
-          const wmo   = getWMO(h.code)
+          const wmo   = getWMO(h.code, h.isDay)
           const norm  = maxT === minT ? 0.5 : (h.temp - minT) / (maxT - minT)
           const isNow = i === 0
           return (

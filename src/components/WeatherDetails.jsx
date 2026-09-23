@@ -1,11 +1,11 @@
 import React from 'react'
-import { formatWind, uvLabel } from '../utils/formatters'
+import { formatWind, formatClock, uvLabel } from '../utils/formatters'
 
 export default function WeatherDetails({ weather }) {
   const c    = weather.current
   const uv   = uvLabel(c.uv_index)
-  const sunrise = new Date(weather.daily.sunrise[0]).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' })
-  const sunset  = new Date(weather.daily.sunset[0]).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' })
+  const sunrise = formatClock(weather.daily.sunrise[0])
+  const sunset  = formatClock(weather.daily.sunset[0])
 
   const items = [
     { icon: '💨', label: 'Wind Speed',   value: formatWind(c.wind_speed_10m) },

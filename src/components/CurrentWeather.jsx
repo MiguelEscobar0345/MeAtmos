@@ -4,9 +4,10 @@ import { formatTemp, formatDate, formatWind, uvLabel } from '../utils/formatters
 
 export default function CurrentWeather({ weather, location, isFavorite, onToggleFavorite }) {
   const c   = weather.current
-  const wmo = getWMO(c.weather_code)
+  const wmo = getWMO(c.weather_code, c.is_day)
   const uv  = uvLabel(c.uv_index)
-  const now = formatDate(new Date().toISOString())
+  // The city's date, not the visitor's (Tokyo is already tomorrow from Bogotá)
+  const now = formatDate(c.time)
 
   return (
     <div style={{
