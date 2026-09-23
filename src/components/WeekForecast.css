@@ -1,0 +1,83 @@
+.week { padding: 22px 16px 12px; container-type: inline-size; }
+.week > .eyebrow { padding-inline: 8px; }
+
+.week__list {
+  list-style: none;
+  margin-top: 10px;
+}
+
+.week__row {
+  display: grid;
+  grid-template-columns: 48px 30px minmax(0, 1.1fr) 50px 34px minmax(80px, 1.6fr) 34px;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 6px 8px;
+  border-radius: var(--r-md);
+}
+
+.week__row + .week__row { border-top: 1px solid var(--line); }
+.week__row.is-today { background: var(--accent-soft); border-color: transparent; }
+.week__row.is-today + .week__row { border-top-color: transparent; }
+
+.week__day { font-weight: 700; }
+.week__row.is-today .week__day { color: var(--accent); }
+
+.week__cond {
+  font-size: 0.86rem;
+  color: var(--ink-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.week__rain {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.8rem;
+  color: var(--rain);
+}
+
+.week__min { text-align: right; color: var(--ink-2); }
+.week__max { text-align: right; font-weight: 500; }
+
+/* Range bar: track = week min…max, fill = this day's min…max */
+.range {
+  position: relative;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+}
+
+.range__fill {
+  position: absolute;
+  inset-block: 0;
+  left: var(--from);
+  right: calc(100% - var(--to));
+  min-width: 6px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--c1), var(--c2));
+}
+
+.range__now {
+  position: absolute;
+  top: 50%;
+  left: var(--now);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 3px solid var(--ink);
+  transform: translate(-50%, -50%);
+}
+
+/* The row adapts to the card's width, not the window's */
+@container (max-width: 560px) {
+  .week__cond { display: none; }
+  .week__row { grid-template-columns: 44px 30px 48px 32px minmax(60px, 1fr) 32px; gap: 10px; }
+}
+
+@container (max-width: 360px) {
+  .week__row { grid-template-columns: 38px 26px 42px 30px minmax(44px, 1fr) 30px; gap: 8px; padding-inline: 4px; }
+}

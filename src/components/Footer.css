@@ -1,0 +1,91 @@
+.footer {
+  margin-top: clamp(56px, 9vw, 104px);
+  padding-block: clamp(40px, 6vw, 64px) 28px;
+  border-top: 1px solid var(--line);
+}
+
+.footer__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.footer__name {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 4px;
+  margin-top: 10px;
+  font-size: clamp(2.5rem, 10vw, 7rem);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.055em;
+  text-decoration: none;
+  transition: color var(--dur) ease;
+}
+
+.footer__arrow {
+  width: 0.42em;
+  height: 0.42em;
+  margin-top: 0.05em;
+  color: var(--accent);
+  transition: transform var(--dur) var(--ease-out);
+}
+
+.footer__name:hover { color: var(--accent); }
+.footer__name:hover .footer__arrow { transform: translate(4px, -4px); }
+
+.footer__cols {
+  display: flex;
+  gap: clamp(32px, 6vw, 72px);
+}
+
+.footer__cols ul { list-style: none; margin-top: 10px; }
+.footer__cols li + li { margin-top: 6px; }
+
+.footer__cols a,
+.footer__bottom a {
+  text-decoration: none;
+  color: var(--ink-2);
+  transition: color var(--dur) ease;
+}
+
+.footer__cols a:hover,
+.footer__bottom a:hover { color: var(--accent); }
+
+.footer__bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-top: 44px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  font-size: 0.82rem;
+  color: var(--ink-3);
+}
+
+.footer__bottom a { text-decoration: underline; text-underline-offset: 2px; }
+
+.footer__sign {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+}
+
+/* The mascot is a black line drawing: used as a mask it takes the text color
+   in both themes */
+.footer__macaw {
+  width: 30px;
+  height: 30px;
+  background: var(--ink-2);
+  -webkit-mask: url('/macaw.png') center / contain no-repeat;
+  mask: url('/macaw.png') center / contain no-repeat;
+}
+
+@media (max-width: 640px) {
+  .footer__top { flex-direction: column; align-items: flex-start; }
+}

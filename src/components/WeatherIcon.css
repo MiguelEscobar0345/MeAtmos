@@ -1,0 +1,33 @@
+/* Icon colors come from tokens; surfaces like the hero sky override them */
+:root {
+  --wi-cloud: #ffffff;
+  --wi-cloud-line: #8e97aa;
+  --wi-moon: #b8a46a;
+  --wi-snow: #5f8fcf;
+}
+
+[data-theme='dark'] {
+  --wi-cloud: #c9d0de;
+  --wi-cloud-line: #c9d0de;
+  --wi-moon: #efe6c6;
+  --wi-snow: #cfe0f5;
+}
+
+.wi { flex-shrink: 0; overflow: visible; }
+
+.wi-sun  { fill: var(--sun); }
+.wi-ray  { stroke: var(--sun); stroke-width: 2; stroke-linecap: round; }
+.wi-moon { fill: var(--wi-moon); }
+
+.wi-cloud {
+  fill: var(--wi-cloud);
+  stroke: var(--wi-cloud-line);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.wi-drop  { stroke: var(--rain); stroke-width: 2; stroke-linecap: round; }
+.wi-flake { stroke: var(--wi-snow); stroke-width: 1.5; stroke-linecap: round; }
+.wi-hail  { fill: var(--wi-snow); }
+.wi-bolt  { fill: var(--sun); stroke: var(--sun); stroke-width: 0.6; stroke-linejoin: round; }
+.wi-fog   { stroke: var(--wi-cloud-line); stroke-width: 2; stroke-linecap: round; }
