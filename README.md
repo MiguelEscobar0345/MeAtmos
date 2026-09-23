@@ -16,8 +16,8 @@ Live demo → **(https://me-atmos.vercel.app/)**
 
 | Layer | Technology |
 |-------|-----------|
-| Framework | React 18 |
-| Build tool | Vite 5 |
+| Framework | React 19 |
+| Build tool | Vite 7 |
 | Styling | CSS-in-JS + CSS variables |
 | Weather data | [Open-Meteo](https://open-meteo.com) — free, no key |
 | Air quality | [Open-Meteo Air Quality API](https://open-meteo.com/en/docs/air-quality-api) |
@@ -35,6 +35,8 @@ Live demo → **(https://me-atmos.vercel.app/)**
 - **Air Quality Index** — European AQI scale + PM2.5, PM10, Ozone, NO₂
 - **Dynamic background** — shifts between moods (clear, rain, storm, snow, fog) based on current conditions
 - **City search** — geocoding for any city in the world
+- **Favorite cities** — up to 3, with live conditions fetched in a single request
+- **City-local time** — dates, "Now" and sunrise/sunset use the city's clock, not the visitor's
 - **Zero API keys** — 100% free, open APIs
 - **Fully responsive** — desktop dashboard layout collapses gracefully to mobile
 
@@ -52,7 +54,7 @@ Live demo → **(https://me-atmos.vercel.app/)**
 ```bash
 # Clone the repo
 git clone https://github.com/MiguelEscobar0345/MeAtmos.git
-cd atmos
+cd MeAtmos
 
 # Install dependencies
 npm install
@@ -75,7 +77,7 @@ npm run preview
 ## Project Structure
 
 ```
-atmos/
+MeAtmos/
 ├── public/
 │   ├── favicon.svg
 │   └── macaw.png           # Personal branding asset
@@ -87,10 +89,11 @@ atmos/
 │   │   ├── WeekForecast.jsx      # 7-day forecast rows
 │   │   ├── AirQuality.jsx        # AQI + pollutants panel
 │   │   ├── WeatherDetails.jsx    # Wind, pressure, UV, sunrise/sunset
-│   │   └── Footer.jsx            # Personal links footer
+│   │   ├── FavoriteCities.jsx    # Saved cities with live temperature
+│   │   └── footer.jsx            # Personal links footer
 │   ├── hooks/
-│   │   ├── useWeather.js         # Geocoding + weather fetch logic
-│   │   └── useAirQuality.js      # Air quality fetch logic
+│   │   ├── useWeather.js         # Geocoding + weather + air quality (parallel)
+│   │   └── useFavoritesWeather.js # One request for all saved cities
 │   ├── utils/
 │   │   ├── weatherCodes.js       # WMO codes, AQI levels, bg gradients
 │   │   └── formatters.js         # Temp, wind, date formatters
@@ -153,7 +156,7 @@ Uses the **European AQI** scale (0–100+):
 | 41–60 | Moderate | Amber |
 | 61–80 | Poor | Orange |
 | 81–100 | Very Poor | Red |
-| 100+ | Hazardous | Purple |
+| 100+ | Extremely poor | Purple |
 
 ---
 
@@ -172,4 +175,4 @@ The data flow is linear: search → geocode → fetch weather + AQ → render. T
 
 ## License
 
-MIT © [Miguel E. Escobar P.](https://portfolio.com)
+MIT © [Miguel Escobar — miguesco](https://miguesco.dev)

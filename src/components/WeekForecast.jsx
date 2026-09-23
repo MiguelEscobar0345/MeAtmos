@@ -7,6 +7,7 @@ export default function WeekForecast({ weather }) {
   const allMaxes = weather.daily.temperature_2m_max
   const globalMax = Math.max(...allMaxes)
   const globalMin = Math.min(...weather.daily.temperature_2m_min)
+  const span = globalMax - globalMin || 1
 
   return (
     <div style={{
@@ -26,8 +27,8 @@ export default function WeekForecast({ weather }) {
           const max  = weather.daily.temperature_2m_max[i]
           const min  = weather.daily.temperature_2m_min[i]
           const isToday = i === 0
-          const barLeft  = ((min - globalMin) / (globalMax - globalMin)) * 100
-          const barWidth = ((max - min) / (globalMax - globalMin)) * 100
+          const barLeft  = ((min - globalMin) / span) * 100
+          const barWidth = ((max - min) / span) * 100
 
           return (
             <div key={day} style={{

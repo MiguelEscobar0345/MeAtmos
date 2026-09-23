@@ -2,7 +2,7 @@ import React from 'react'
 
 const LINKS = {
   sitemap: [
-    { label: 'Portfolio',  href: 'https://portfolio.com' },
+    { label: 'Portfolio',  href: 'https://miguesco.dev' },
     { label: 'Contact',    href: 'mailto:miguelescobarp03@gmail.com' },
   ],
   socials: [
@@ -56,7 +56,7 @@ export default function Footer() {
               <div style={{ fontSize:'0.6rem', color:'rgba(255,255,255,0.25)', textTransform:'uppercase', letterSpacing:'0.1em', fontFamily:'var(--font-mono)' }}>Version</div>
               <div style={{ fontSize:'1.3rem', fontWeight:700, color:'var(--text-1)', fontFamily:'var(--font-mono)' }}>2026</div>
             </div>
-            <img src="/public/macaw.png" alt="Macaw" style={{ width:44, height:44, objectFit:'contain', opacity:0.8 }} onError={e => { e.target.style.display='none' }} />
+            <img src="/macaw.png" alt="Macaw" style={{ width:44, height:44, objectFit:'contain', opacity:0.8, filter:'invert(1)' }} onError={e => { e.target.style.display='none' }} />
           </div>
         </div>
       </footer>

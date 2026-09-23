@@ -1,7 +1,8 @@
 import React from 'react'
 import { getWMO } from '../utils/weatherCodes'
+import { favKey } from '../hooks/useFavoritesWeather'
 
-export default function FavoriteCities({ favorites, onSelect, onRemove }) {
+export default function FavoriteCities({ favorites, liveFor, onSelect, onRemove }) {
   if (!favorites.length) return null
 
   return (
@@ -19,11 +20,14 @@ export default function FavoriteCities({ favorites, onSelect, onRemove }) {
         gap: 12,
       }}>
         {favorites.map(city => {
-          const wmo = getWMO(city.weatherCode ?? 0)
+          // Live conditions when available, saved snapshot (legacy entries) otherwise
+          const live = liveFor(city)
+          const temp = live?.temperature_2m ?? city.temp
+          const wmo  = getWMO(live?.weather_code ?? city.weatherCode ?? 0, live?.is_day ?? 1)
           return (
             <div
-              key={city.name + city.country}
-              onClick={() => onSelect(city.name)}
+              key={favKey(city)}
+              onClick={() => onSelect(city)}
               style={{
                 background: 'rgba(255,255,255,0.05)',
                 border: '1px solid rgba(255,255,255,0.1)',
@@ -44,7 +48,7 @@ export default function FavoriteCities({ favorites, onSelect, onRemove }) {
             >
               {/* Remove star */}
               <button
-                onClick={e => { e.stopPropagation(); onRemove(city.name) }}
+                onClick={e => { e.stopPropagation(); onRemove(city) }}
                 aria-label="Remove favorite"
                 style={{
                   position: 'absolute', top: 12, right: 12,
@@ -75,7 +79,7 @@ export default function FavoriteCities({ favorites, onSelect, onRemove }) {
               }}>
                 {city.country}
               </div>
-              {city.temp != null && (
+              {temp != null && (
                 <div style={{
                   marginTop: 10,
                   fontSize: '1.3rem', fontWeight: 800,
@@ -83,7 +87,7 @@ export default function FavoriteCities({ favorites, onSelect, onRemove }) {
                   color: 'var(--accent)',
                   letterSpacing: '-0.03em',
                 }}>
-                  {Math.round(city.temp)}°
+                  {Math.round(temp)}°
                 </div>
               )}
             </div>
